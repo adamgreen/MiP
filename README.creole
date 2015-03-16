@@ -1,0 +1,7 @@
+=MiP Hacking
+==Overview
+==Interesting Links
+[[https://www.sparkfun.com/products/13222 | WowWee MiP robot available @ Sparkfun]] \\
+[[https://learn.sparkfun.com/tutorials/hacking-the-mip---proto-pack | Hacking the MiP - Proto Pack by Sparkfun]] \\
+[[https://learn.sparkfun.com/tutorials/hacking-the-mip---proto-back | Hacking the MiP - Proto Back by Sparkfun]] \\
+[[https://github.com/WowWeeLabs/MiP-BLE-Protocol | WowWee MiP Bluetooth Low Energy Protocol Documentation on GitHub]] \\
