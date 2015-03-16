@@ -1,5 +1,11 @@
 =MiP Hacking
 ==Overview
+This project is just a place for me to record any progress I make as I hack around with my
+[[https://www.wowwee.com/mip/ | WowWee MiP Balancing Robot]].
+
+{{https://github.com/adamgreen/MiP/raw/master/images/20150316-01.jpg}}
+
+
 ==Interesting Links
 [[https://www.sparkfun.com/products/13222 | WowWee MiP robot available @ Sparkfun]] \\
 [[https://learn.sparkfun.com/tutorials/hacking-the-mip---proto-pack | Hacking the MiP - Proto Pack by Sparkfun]] \\
