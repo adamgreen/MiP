@@ -11,3 +11,37 @@ This project is just a place for me to record any progress I make as I hack arou
 [[https://learn.sparkfun.com/tutorials/hacking-the-mip---proto-pack | Hacking the MiP - Proto Pack by Sparkfun]] \\
 [[https://learn.sparkfun.com/tutorials/hacking-the-mip---proto-back | Hacking the MiP - Proto Back by Sparkfun]] \\
 [[https://github.com/WowWeeLabs/MiP-BLE-Protocol | WowWee MiP Bluetooth Low Energy Protocol Documentation on GitHub]] \\
+[[https://github.com/charcole/MiP-OSX | charcole's OS X MiP Sample on GitHub]]\\
+
+
+
+==March 17th, 2015
+I got my first BLE sample running on the MacBook Air.  I pulled down Apple's
+[[https://developer.apple.com/library/mac/samplecode/HeartRateMonitor/Introduction/Intro.html#//apple_ref/doc/uid/DTS40011322 | CoreBluetooth: Heart Rate Monitor Sample]]
+and built it.  It successfully connected to a heart rate monitor sample running on a
+[[http://developer.mbed.org/platforms/Nordic-nRF51822 | NRF51822 development board]] that I already had sitting on my
+desk.\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150317-01.jpg}}\\
+My goal is now to combine the code in this Heart Rate Monitor Sample with the existing OS X console based MiP sample
+found [[https://github.com/charcole/MiP-OSX | here on github]] and have it connect to the MiP instead.  With that goal in
+mind I will spend some time this evening reading the source code of both samples.
+
+
+
+==March 16th, 2015
+My first hacking attempt will be via the Bluetooth Low Energy (BLE) communication channel. In the future I want to use
+the built-in UART communication channel to interface with a microcontroller mounted directly to the MiP robot.  However
+using BLE to control the MiP robot directly from my OS X based MacBook Air initially will have a few benefits:
+* I don't need to take the new robot apart immediately to gain access to the internal UART port.
+* It is easier to debug and troubleshoot any misinterpretations that I make when reading the
+  [[https://github.com/WowWeeLabs/MiP-BLE-Protocol | MiP BLE protocol documentation]] if the code is running directly on
+  my laptop.
+
+While I have connected BLE peripherals to my phone before, I haven't done so with my MacBook Air.  Should it support
+code that I would write to interface with the MiP via BLE?  I think so:
+* My MacBook Air indicates that its Bluetooth hardware has a LMP version of 6 which is supposed to be new enough to
+  support BLE according to this [[http://www.imore.com/how-tell-if-your-mac-has-bluetooth-40 | website]].
+* I am running version 10.9.5 of the Macintosh operating system.  From what I have read in the Apple documentation, this
+  version should support the required Core Bluetooth framework.
+* I already have the latest 6.2 version of Xcode installed on my MacBook Air so I should be ready to start some BLE
+  coding.
