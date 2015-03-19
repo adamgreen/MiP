@@ -15,6 +15,81 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==March 18th, 2015
+Last night I finished reading through Apple's Heart Rate Monitor Sample source code to get a feel for what I would need
+to change to have it communicate with the MiP instead.  It seemed like it wouldn't take too much to get it to discover
+and connect to MiP robots instead of heart rate monitors.
+
+I used the following code to have OS X Core Bluetooth framework look for BLE devices which advertise themselves as
+supporting the **0xfff0** service as the MiP does.  **Note:** The MiP advertises itself as support the **0xfff0**
+and **0xffb0** as documented [[https://github.com/WowWeeLabs/MiP-BLE-Protocol#how-to-use-it | here]] but this isn't one
+of the services that we will later use to actually communicate with the MiP.  There are other services that we will use
+for that but they aren't advertised in the limited space given to these BLE broadcast packets.
+
+{{{
+#define MIP_BROADCAST_SERVICE1 "fff0"
+
+/*
+ Request CBCentralManager to scan for WowWee MiP via one of the two services that it broadcasts.
+ */
+- (void) startScan
+{
+    [manager scanForPeripheralsWithServices:[NSArray arrayWithObject:[CBUUID UUIDWithString:@MIP_BROADCAST_SERVICE1]] options:nil];
+}
+}}}
+
+When OS X's Core Bluetooth framework discovers BLE devices supporting the **0xfff0** service, it will call
+the **centralManager:didDiscoverPeripheral:advertisementData:RSSI:** selector.  In the implementation of this selector
+we can look at the first two bytes of the ManufacturerData advertisement data to make sure that it
+contains **0x00 0x05** as documented [[https://github.com/WowWeeLabs/MiP-BLE-Protocol#how-to-use-it | here]].  Devices
+which don't match can be ignored as they are probably another WowWee product but not a MiP robot.
+
+{{{
+/*
+ Invoked when the central discovers heart rate peripheral while scanning.
+ */
+- (void) centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)aPeripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI 
+{
+    /* Check the manufacturing data to make sure that the first two bytes are 0x00 0x05 to indicate that it is a MiP device. */
+    NSData* manufacturerDataObject = [advertisementData objectForKey:CBAdvertisementDataManufacturerDataKey];
+    uint8_t manufacturerData[2];
+    [manufacturerDataObject getBytes:manufacturerData length:sizeof(manufacturerData)];
+    if (0 != memcmp(manufacturerData, MIP_MANUFACTURER_DATA_TYPE, sizeof(manufacturerData)))
+    {
+        return;
+    }
+    
+    NSMutableArray *peripherals = [self mutableArrayValueForKey:@"heartRateMonitors"];
+    if( ![self.heartRateMonitors containsObject:aPeripheral] )
+        [peripherals addObject:aPeripheral];
+    
+    /* Connect to first MiP device found. */
+    if(autoConnect)
+    {
+        NSLog(@"Auto connecting");
+        peripheral = aPeripheral;
+        [peripheral retain];
+        [indicatorButton setHidden:FALSE];
+        [progressIndicator setHidden:FALSE];
+        [progressIndicator startAnimation:self];
+        [connectButton setTitle:@"Cancel"];
+        [manager connectPeripheral:peripheral options:nil];
+    }
+    
+    NSLog(@"didDiscoverPeripheral: Name: %@", aPeripheral.name);
+    NSLog(@"didDiscoverPeripheral: Advertisment Data: %@", advertisementData);
+    NSLog(@"didDiscoverPeripheral: RSSI: %@", RSSI);
+}
+}}}
+
+The following photo shows OS X discovering my MiP.\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150318-01.jpg}}\\
+The next photo shows OS X connected to my MiP.  You will notice that the light in MiP's chest has turned green to
+indicate that it is now connected.\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150318-02.jpg}}\\
+
+
+
 ==March 17th, 2015
 I got my first BLE sample running on the MacBook Air.  I pulled down Apple's
 [[https://developer.apple.com/library/mac/samplecode/HeartRateMonitor/Introduction/Intro.html#//apple_ref/doc/uid/DTS40011322 | CoreBluetooth: Heart Rate Monitor Sample]]
