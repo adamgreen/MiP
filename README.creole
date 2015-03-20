@@ -15,6 +15,221 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==March 19, 2015
+Today, I made pretty good progress on getting my MacBook Air to communicate with the MiP via BLE.  I accomplished my
+goal of sending it the **0x14** request which asks the MiP to return the build date for it's firmware image.
+{{{
+2015-03-19 23:19:02.234 HeartRateMonitor[91837:303] Get MiP Version Command Response (0x14)
+2015-03-19 23:19:02.234 HeartRateMonitor[91837:303] Year = 14
+2015-03-19 23:19:02.235 HeartRateMonitor[91837:303] Month = 3
+2015-03-19 23:19:02.235 HeartRateMonitor[91837:303] Day = 22
+2015-03-19 23:19:02.235 HeartRateMonitor[91837:303] Revision = 2
+}}}
+The response text indicates that the firmware was built on March 22nd, 2014 and this was the 2nd build from that day.
+
+The user is able to select the MiP to which a connection should be made and then press the connect button.  That action
+will cause the following selector to be called as the scan sheet/dialog is closed.
+{{{
+/* 
+ This method is called when Scan sheet is closed. Initiate connection to selected MiP robot.
+*/
+- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo 
+{
+    [self stopScan];
+    if( returnCode == NSAlertDefaultReturn )
+    {
+        NSIndexSet *indexes = [self.arrayController selectionIndexes];
+        if ([indexes count] != 0) 
+        {
+            NSUInteger anIndex = [indexes firstIndex];
+            peripheral = [self.heartRateMonitors objectAtIndex:anIndex];
+            [peripheral retain];
+            [indicatorButton setHidden:FALSE];
+            [progressIndicator setHidden:FALSE];
+            [progressIndicator startAnimation:self];
+            [connectButton setTitle:@"Cancel"];
+            [manager connectPeripheral:peripheral options:nil];
+        }
+    }
+}
+}}}
+That code contains the necessary call to {{{[manager connectPeripheral:peripheral options:nil]}}} which actually
+establishes the connection with the selected MiP robot.
+
+Once the connection is completed, the following selector will be executed:
+{{{
+/*
+ Invoked whenever a connection is succesfully created with the peripheral. 
+ Discover available services on the peripheral
+ */
+- (void) centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)aPeripheral 
+{
+    characteristicsToFind = 2;
+    [aPeripheral setDelegate:self];
+    [aPeripheral discoverServices:nil];
+    ...	
+}
+}}}
+
+This code includes the {{{[aPeripheral discoverServices:nil]}}} call to have the MiP send over all of the BLE services
+that it supports.  For each of these services it calls the following selector.
+{{{
+// These are the services used to send/receive data with the MiP.
+#define MIP_RECEIVE_DATA_SERVICE    "ffe0"
+#define MIP_SEND_DATA_SERVICE       "ffe5"
+
+/*
+ Invoked upon completion of a -[discoverServices:] request.
+ Discover available characteristics on interested services
+ */
+- (void) peripheral:(CBPeripheral *)aPeripheral didDiscoverServices:(NSError *)error 
+{
+    for (CBService *aService in aPeripheral.services) 
+    {
+        NSLog(@"Service found with UUID: %@", aService.UUID);
+        
+        /* MiP specific services */
+        if ([aService.UUID isEqual:[CBUUID UUIDWithString:@MIP_RECEIVE_DATA_SERVICE]] ||
+            [aService.UUID isEqual:[CBUUID UUIDWithString:@MIP_SEND_DATA_SERVICE]])
+        {
+            [aPeripheral discoverCharacteristics:nil forService:aService];
+        }
+        ...
+    }
+}
+}}}
+
+The two main MiP services that we care about are MIP_RECEIVE_DATA_SERVICE (**ffe0**) and MIP_SEND_DATA_SERVICE
+(**ffe5**).  For these two services, the {{{[aPeripheral discoverCharacteristics:nil forService:aService]}}} call will
+be made to iterate over each of the characteristics in the service.  For each characteristic, the following selector
+will be executed:
+{{{
+// Characteristic of MIP_RECEIVE_DATA_SERVICE which receives data from MiP.
+// The controller can register for notifications on this characteristic.
+#define MIP_RECEIVE_DATA_NOTIFY_CHARACTERISTIC "ffe4"
+// Characteristic of MIP_SEND_DATA_SERVICE to which data is sent to MiP.
+#define MIP_SEND_DATA_WRITE_CHARACTERISTIC "ffe9"
+
+/*
+ Invoked upon completion of a -[discoverCharacteristics:forService:] request.
+ Perform appropriate operations on interested characteristics
+ */
+- (void) peripheral:(CBPeripheral *)aPeripheral didDiscoverCharacteristicsForService:(CBService *)service error:(NSError *)error 
+{
+    /* MiP Receive Data Service. */
+    if ([service.UUID isEqual:[CBUUID UUIDWithString:@MIP_RECEIVE_DATA_SERVICE]])
+    {
+        for (CBCharacteristic *aChar in service.characteristics) 
+        {
+            /* Set notification on received data. */
+            if ([aChar.UUID isEqual:[CBUUID UUIDWithString:@MIP_RECEIVE_DATA_NOTIFY_CHARACTERISTIC]])
+            {
+                [peripheral setNotifyValue:YES forCharacteristic:aChar];
+                characteristicsToFind--;
+                NSLog(@"Found a Receive Data Notify Characteristic");
+            }
+        }
+    }
+    
+    /* MiP Send Data Service. */
+    if ([service.UUID isEqual:[CBUUID UUIDWithString:@MIP_SEND_DATA_SERVICE]])
+    {
+        for (CBCharacteristic *aChar in service.characteristics)
+        {
+            /* Remember Send Data Characteristic pointer. */
+            if ([aChar.UUID isEqual:[CBUUID UUIDWithString:@MIP_SEND_DATA_WRITE_CHARACTERISTIC]])
+            {
+                sendDataWriteCharacteristic = aChar;
+                NSLog(@"Found a Send Data Write Characteristic");
+                characteristicsToFind--;
+            }
+        }
+    }
+    ...
+    if (characteristicsToFind == 0)
+    {
+        uint8_t cmd = MIP_CMD_GET_SOFTWARE_VERSION;
+        NSData* cmdData = [NSData dataWithBytes:(void*)&cmd length:sizeof(cmd)];
+        [aPeripheral writeValue:cmdData forCharacteristic:sendDataWriteCharacteristic type:CBCharacteristicWriteWithResponse];
+        characteristicsToFind = -1;
+    }
+}
+}}}
+
+Once the MIP_RECEIVE_DATA_NOTIFY_CHARACTERISTIC (**ffe4**) characteristic is found, the
+{{{[peripheral setNotifyValue:YES forCharacteristic:aChar]}}} call is made.  This asks the Core Bluetooth framework to
+request that the MiP send a notification to the MacBook anytime there is a new receive data to be read.  Such
+notifications will cause the {{{peripheral:didUpdateValueForCharacteristic:error:}}} selector to be called.  This
+selector will be discussed shortly.
+
+When the MIP_SEND_DATA_SERVICE (**ffe9**) characteristic is found, the characteristic pointer is saved so that we can
+later use it to send requests to the MiP.
+
+Once both of those characteristics have been found, we can use them to send the first command
+MIP_CMD_GET_SOFTWARE_VERSION (**0x14**) to the MiP and wait for its response.  The response will be sent to the
+following selector because we asked for notifications on the MIP_RECEIVE_DATA_NOTIFY_CHARACTERISTIC.
+{{{
+/*
+ Invoked upon completion of a -[readValueForCharacteristic:] request or on the reception of a notification/indication.
+ */
+- (void) peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error 
+{
+    ...
+    /* Response from MiP command has been received. */
+    else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@MIP_RECEIVE_DATA_NOTIFY_CHARACTERISTIC]])
+    {
+        const uint8_t* pResponseBytes = characteristic.value.bytes;
+        NSUInteger responseLength = [characteristic.value length];
+        if ((responseLength & 1) != 0)
+        {
+            /* Expect the response to be hexadecimal text with two characters per digit. */
+            return;
+        }
+        /* Allocate a buffer to hold the actual bytes of the response which are parsed from hex data. */
+        responseLength /= 2;
+        uint8_t* pResponse = malloc(responseLength);
+        if (!pResponse)
+        {
+            return;
+        }
+        /* Convert hexadecimal string into raw byte response. */
+        for (int i = 0, j = 0 ; i < responseLength ; i++, j+=2)
+        {
+            pResponse[i] = parseHexDigit(pResponseBytes[j]) << 4 | parseHexDigit(pResponseBytes[j+1]);
+        }
+
+        if (pResponse[0] == MIP_CMD_GET_SOFTWARE_VERSION)
+        {
+            NSLog(@"Get MiP Version Command Response (0x%02X)", pResponse[0]);
+            NSLog(@"Year = %u", pResponse[1]);
+            NSLog(@"Month = %u", pResponse[2]);
+            NSLog(@"Day = %u", pResponse[3]);
+            NSLog(@"Revision = %u", pResponse[4]);
+        }
+        else
+        {
+            NSLog(@"Response buffer = %@", [[[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding] autorelease]);
+        }
+        
+        free(pResponse);
+    }
+}
+}}}
+The most complicated part of this code is due to the fact that the response data sent back from the MiP is represented
+as hexadecimal text.  This means that there are 2 hex digits for each byte of the response.  The conversion code
+allocates a buffer big enough for that data, pResponse, and then parses the hex digits into it.  The first byte of the
+response will match the command which caused this response to be generated.  There is then code to interpret the date
+from the MIP_CMD_GET_SOFTWARE_VERSION response and log it to the debug console.  There is also code to dump the raw
+hexadecimal text for any other received data packets.  It turns out that every 30 seconds, the MiP does send the
+following packet as well:
+{{{
+2015-03-19 23:19:29.943 HeartRateMonitor[91837:303] Response buffer = 796A06
+}}}
+This is a status packet.  It indicates the battery level (**0x6A**) and the current position of being leaned back on its
+kickstand (**0x06**).
+
+
+
 ==March 18th, 2015
 Last night I finished reading through Apple's Heart Rate Monitor Sample source code to get a feel for what I would need
 to change to have it communicate with the MiP instead.  It seemed like it wouldn't take too much to get it to discover
@@ -45,6 +260,8 @@ contains **0x00 0x05** as documented [[https://github.com/WowWeeLabs/MiP-BLE-Pro
 which don't match can be ignored as they are probably another WowWee product but not a MiP robot.
 
 {{{
+#define MIP_MANUFACTURER_DATA_TYPE "\x00\x05"
+
 /*
  Invoked when the central discovers heart rate peripheral while scanning.
  */
