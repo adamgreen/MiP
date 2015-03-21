@@ -15,6 +15,25 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==March 20, 2015
+Now that I have successfully connected my MacBook to the MiP robot over Bluetooth Low Energy (BLE), I need to think
+about what my next steps should be.  My current thoughts are:
+# Continue with the heart rate monitor based OS X Cocoa GUI sample.
+# Switch to using my NRF51822 development board as a BLE controller and write code using the mbed SDK.
+# Jump ahead and connect a mbed controller directly to the MiP using the UART.
+# Take what I have learned to build a Console OS X sample.
+
+My current plans are to take the last path and build a console based sample to run on my MacBook.  My goal with this
+sample is to develop a C API using the OS X Core Bluetooth Foundation classes as the transport.  Later I can port this
+API to run on a mbed board using the UART as the transport instead.
+
+Even though it isn't very useful I have uploaded my modified version of the Heart Rate Monitor sample to
+[[https://github.com/adamgreen/MiP/tree/master/OSX_CocoaSample]].  It will allow people to see some of the code snippets
+from my previous posts in context of the whole program.  I plan to start code development on a more useful OS X sample
+in the near future.
+
+
+
 ==March 19, 2015
 Today, I made pretty good progress on getting my MacBook Air to communicate with the MiP via BLE.  I accomplished my
 goal of sending it the **0x14** request which asks the MiP to return the build date for it's firmware image.
