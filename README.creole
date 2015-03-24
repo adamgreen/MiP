@@ -15,6 +15,19 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==March 24, 2015
+I have been silent for a few days now that I am actually writing some Objective-C code to run on my MacBook.  I am still
+not at the point that I have things implemented enough to document much here but I hope to soon have something worth
+sharing.
+
+As I have been relearning how to write code for OS X and learning more about multithreaded programming on that platform,
+I have come across a few interesting resources that I thought I would record here:\\
+[[https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/Multithreading/Introduction/Introduction.html#//apple_ref/doc/uid/10000057i-CH1-SW1 | Apple's Threading Programming Guide]]\\
+[[https://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html | Just Software Solutions - Implementing a Thread-Safe Queue using Condition Variables]]\\
+[[http://www.amazon.com/Advanced-Mac-OS-Programming-Guides/dp/0321706250 | Advanced Mac OS X Programming by Mark Dalrymple 2011 - Chapter 20 - Multithreading]]\\  
+
+
+
 ==March 20, 2015
 Now that I have successfully connected my MacBook to the MiP robot over Bluetooth Low Energy (BLE), I need to think
 about what my next steps should be.  My current thoughts are:
