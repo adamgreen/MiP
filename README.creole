@@ -15,6 +15,89 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==March 25, 2015
+I pushed up the
+[[https://github.com/adamgreen/MiP/tree/24b4e8b947e609dc6b1f6e8abb9538447bfcd6f1/OSX_ConsoleSample | first version of my OS X console sample]]
+for interacting with the MiP robot.  It is very rough at this point but it will let me continue my experiments with the
+MiP to see what it is and isn't capable of doing.  The following is taken from the commit text for this initial
+functionality:
+{{{
+commit 24b4e8b947e609dc6b1f6e8abb9538447bfcd6f1
+Author: Adam Green <adamgr@foo.bar>
+Date:   Wed Mar 25 13:43:19 2015 -0700
+
+    Initial commit of OS X console sample
+    
+    This is the initial commit of the sample code that I have written to
+    allow the control of the MiP robot over Bluetooth Low Energy (BLE)
+    using the Core Bluetooth framework on OS X.
+    
+    Two threads are used in this sample.  The main thread is left executing
+    a NSApplication run loop.  A worker thread is started to run the
+    code which wants to interact with the robot to do things like
+    commanding it to drive around.  The code running in this thread
+    starts at the robotMain() function found in main.c  When it needs
+    to utilize the Core Bluetooth stack, it communicates its requests to
+    the main thread via mipTransport*() functions.
+    
+    There are a few limitations to the current code:
+    * The transport mechanism, OS X Core Bluetooth in this case, is exposed
+      directly to the developer.  In the future this will be abstracted
+      behind a transport agnostic interface.  But that will only happen if
+      I continue to experiment with the MiP robot after playing around with
+      this current API to see what is and isn't possible to accomplish with
+      this little bot.
+    * There is currently no code to attempt reconnecting to the MiP if it
+      should go out of range or otherwise lose its BLE connectivity for a
+      brief period of time.
+    * It is relatively untested at this time.  I will continue to test and
+      explore the abilities of the MiP and this code in the near futre.
+    * There is limited documentation.  I did add some comments to the
+      mip.h header file.  I will flush this documentation out further in
+      the future if I decide to continue with these MiP hacks.
+}}}
+
+The code which sends requests and receives responses from the MiP in this sample can be found in the
+[[https://github.com/adamgreen/MiP/blob/24b4e8b947e609dc6b1f6e8abb9538447bfcd6f1/OSX_ConsoleSample/main.c#L29 | robotMain() function]].
+This is an excerpt:
+{{{
+void robotMain(void)
+{
+    // Connect to the first MiP robot discovered.
+    MiPTransport* pTransport = mipTransportInit(NULL);
+    mipTransportConnectToRobot(pTransport, NULL);
+
+    // Set the chest LED to purple.
+    static const uint8_t setChestPurple[] = "\x84\xff\x00\xff";
+    mipTransportSendRequest(pTransport, setChestPurple, sizeof(setChestPurple)-1, MIP_EXPECT_NO_RESPONSE);
+
+    // Read out the current settings for the chest LED.
+    static const uint8_t getChestColor[] = "\x83";
+    uint8_t response[5+1];
+    size_t responseLength = 0;
+    mipTransportSendRequest(pTransport, getChestColor, sizeof(getChestColor)-1, MIP_EXPECT_RESPONSE);
+    mipTransportGetResponse(pTransport, response, sizeof(response), &responseLength);
+    printf("Response Length: %lu\n", responseLength);
+    printf("Command: %02X\n", response[0]);
+    printf("Red    : %02X\n", response[1]);
+    printf("Green  : %02X\n", response[2]);
+    printf("Blue   : %02X\n", response[3]);
+    printf("On     : %u\n", (unsigned int)response[4] * 10);
+    printf("Off    : %u\n", (unsigned int)response[5] * 10);
+
+    mipTransportUninit(pTransport);
+}
+}}}
+
+The limited documentation that exists at this point can be found in
+[[https://github.com/adamgreen/MiP/blob/24b4e8b947e609dc6b1f6e8abb9538447bfcd6f1/OSX_ConsoleSample/mip.h | mip.h]].
+
+I will spend the next few days expanding on this sample to play around with various commands from the
+[[https://github.com/WowWeeLabs/MiP-BLE-Protocol/blob/master/MiP-Protocol.md | MiP BLE Protocol documentation]] to get a
+feel for what kind of control I can have over the MiP robot and what types of hacks it will enable.
+
+
+
 ==March 24, 2015
 I have been silent for a few days now that I am actually writing some Objective-C code to run on my MacBook.  I am still
 not at the point that I have things implemented enough to document much here but I hope to soon have something worth
