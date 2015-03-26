@@ -19,3 +19,7 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+*.dSym/
+
+# Output binaries
+MiP
