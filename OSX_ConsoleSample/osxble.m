@@ -19,6 +19,7 @@
 #import <Cocoa/Cocoa.h>
 #import <IOBluetooth/IOBluetooth.h>
 #import <pthread.h>
+#import <sys/time.h>
 #import "mip.h"
 
 
@@ -46,6 +47,9 @@ static void* robotThread(void* pArg);
 // MiP devices will have the following values in the first 2 bytes of their Manufacturer Data.
 #define MIP_MANUFACTURER_DATA_TYPE "\x00\x05"
 
+// Maximum number of retries for sending a request when the expected response isn't received.
+#define MIP_MAXIMUM_REQEUST_RETRIES 2
+
 
 
 // This class contains the information for a single request and its matching response (if it has one).
@@ -67,7 +71,7 @@ static void* robotThread(void* pArg);
 - (size_t) requestLength;
 
 - (BOOL) waitingForResponse;
-- (void) waitForResponse;
+- (BOOL) waitForResponse;
 
 - (void) setResponse:(const uint8_t*)p length:(size_t)len;
 - (const uint8_t*) response;
@@ -137,12 +141,25 @@ static void* robotThread(void* pArg);
 }
 
 // Block and wait for the response to the last request to actually arrive from the robot.
-- (void) waitForResponse
+- (BOOL) waitForResponse
 {
+    // Wait for a maximum of 1 second for a response as responses typically come back in just less than 0.5 seconds.
+    int res = 0;
+    struct timeval tv;
+    struct timespec ts;
+    gettimeofday(&tv, NULL);
+    ts.tv_sec = tv.tv_sec + 1;
+    ts.tv_nsec = tv.tv_usec * 1000;
+
     pthread_mutex_lock(&mutex);
-    while (waitingForResponse)
-        pthread_cond_wait(&condition, &mutex);
+    while (waitingForResponse && res != ETIMEDOUT)
+        res = pthread_cond_timedwait(&condition, &mutex, &ts);
     pthread_mutex_unlock(&mutex);
+
+    // Return FALSE if we timed out waiting to receive response.
+    if (res == ETIMEDOUT)
+        return FALSE;
+    return TRUE;
 }
 
 // Make a deep copy of the response received from the robot.
@@ -410,14 +427,18 @@ static void* robotThread(void* pArg);
 }
 
 // Invoked whenever an existing connection with the peripheral is torn down.
-- (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)error
+- (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)err
 {
+    NSLog(@"didDisconnectPeripheral");
+    NSLog(@"%@", err);
     [self clearPeripheral];
 }
 
 // Invoked whenever the central manager fails to create a connection with the peripheral.
-- (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)error
+- (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)err
 {
+    NSLog(@"didFailToConnectPeripheral");
+    NSLog(@"%@", err);
     [self clearPeripheral];
     [self signalConnectionError];
 }
@@ -557,9 +578,10 @@ static void* robotThread(void* pArg);
     // Prepare data to send to MiP robot via Core Bluetooth.
     MiPRequestResponse* request = (MiPRequestResponse*)object;
     NSData* cmdData = [NSData dataWithBytes:[request request] length:[request requestLength]];
-    if ([request waitingForResponse])
+
+    // Retain a copy of the request if expecting a response and it isn't a retry (requestResponse == request for retry).
+    if ([request waitingForResponse] && requestResponse != request)
     {
-        // Keep request/response object around if it expects a response to this request.
         [request retain];
         requestResponse = request;
     }
@@ -574,8 +596,11 @@ static void* robotThread(void* pArg);
 }
 
 // Invoked upon completion of a -[readValueForCharacteristic:] request or on the reception of a notification/indication.
-- (void) peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
+- (void) peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)err
 {
+    if (err)
+        NSLog(@"Read encountered error (%@)", err);
+
     // Response from MiP command has been received.
     if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@MIP_RECEIVE_DATA_NOTIFY_CHARACTERISTIC]])
     {
@@ -608,12 +633,18 @@ static void* robotThread(void* pArg);
         }
         else
         {
+            NSLog(@"OOB = %@", [[[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding] autorelease]);
             // Received Out of Band response from MiP.
             pthread_mutex_lock(&oobMutex);
                 memcpy(oobResponse, response, responseLength);
                 oobResponseLength = responseLength;
             pthread_mutex_unlock(&oobMutex);
         }
+    }
+    else
+    {
+        NSLog(@"Unexpected characteristic %@", characteristic.UUID);
+        NSLog(@"%@", characteristic.value.bytes);
     }
 }
 
@@ -788,11 +819,27 @@ int mipTransportGetResponse(MiPTransport* pTransport, uint8_t* pResponseBuffer, 
     if ([g_appDelegate error])
         return [g_appDelegate error];
 
-    [g_lastRequest waitForResponse];
+    int  retries = MIP_MAXIMUM_REQEUST_RETRIES;
+    BOOL waitResult = FALSE;
+    do
+    {
+        waitResult = [g_lastRequest waitForResponse];
+        if (!waitResult && retries > 0)
+        {
+            NSLog(@"Retrying request");
+            [g_lastRequest retain];
+            [g_appDelegate performSelectorOnMainThread:@selector(handleMiPRequest:) withObject:g_lastRequest waitUntilDone:YES];
+        }
+    } while (!waitResult && retries-- > 0);
+    if (!waitResult)
+    {
+        NSLog(@"Returning time out error");
+        return MIP_ERROR_TIMEOUT;
+    }
 
     size_t srcLength = [g_lastRequest responseLength];
     size_t copyLength = srcLength;
-    if (responseBufferSize < srcLength)
+    if (copyLength > responseBufferSize)
         copyLength = responseBufferSize;
     memcpy(pResponseBuffer, [g_lastRequest response], copyLength);
     *pResponseLength = copyLength;

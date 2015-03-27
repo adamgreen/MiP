@@ -28,6 +28,7 @@
 #define MIP_ERROR_MEMORY        3 // Out of memory.
 #define MIP_ERROR_NOT_CONNECTED 4 // No MiP robot connected.
 #define MIP_ERROR_NO_REQUEST    5 // Not waiting for a response from a request.
+#define MIP_ERROR_TIMEOUT       6 // Timed out waiting for response.
 
 // expectResponse parameter values for mipTransportSendRequest() parameter.
 #define MIP_EXPECT_NO_RESPONSE 0
