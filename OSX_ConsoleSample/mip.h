@@ -79,6 +79,11 @@ void          mipTransportUninit(MiPTransport* pTransport);
 //   Returns: MIP_ERROR_NONE on success and a non-zero MIP_ERROR_* code otherwise.
 int mipTransportConnectToRobot(MiPTransport* pTransport, const char* pRobotName);
 
+// Disconnect from MiP robot.
+//   pTransport: An object that was previously returned from the mipTransportInit() call.
+//   Returns: MIP_ERROR_NONE on success and a non-zero MIP_ERROR_* code otherwise.
+int mipTransportDisconnectFromRobot(MiPTransport* pTransport);
+
 // Start the process of discovering MiP robots to which a connection can be made.
 // This discovery process will continue until mipTransportStopRobotDiscovery() is called.  Once the discovery process
 // has started, the mipTransportGetDiscoveredRobotCount() and mipTransportGetDiscoveredRobotName() functions called be

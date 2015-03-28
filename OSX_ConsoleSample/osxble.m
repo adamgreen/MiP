@@ -221,6 +221,8 @@ static void* robotThread(void* pArg);
 - (void) foundCharacteristic;
 - (void) signalConnectionError;
 - (void) waitForConnectToComplete;
+- (void) handleMiPDisconnect:(id) dummy;
+- (void) waitForDisconnectToComplete;
 - (void) handleMiPDiscoveryStart:(id) dummy;
 - (void) handleMiPDiscoveryStop:(id) dummy;
 - (NSUInteger) getDiscoveredRobotCount;
@@ -320,9 +322,12 @@ static void* robotThread(void* pArg);
     if (!peripheral)
         return;
 
-    [peripheral setDelegate:nil];
-    [peripheral release];
-    peripheral = nil;
+    pthread_mutex_lock(&connectMutex);
+        [peripheral setDelegate:nil];
+        [peripheral release];
+        peripheral = nil;
+    pthread_mutex_unlock(&connectMutex);
+    pthread_cond_signal(&connectCondition);
 }
 
 // Handle MiP robot connection request posted to the main thread by the worker thread.
@@ -430,7 +435,7 @@ static void* robotThread(void* pArg);
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)err
 {
     NSLog(@"didDisconnectPeripheral");
-    NSLog(@"%@", err);
+    NSLog(@"err = %@", err);
     [self clearPeripheral];
 }
 
@@ -438,7 +443,7 @@ static void* robotThread(void* pArg);
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)err
 {
     NSLog(@"didFailToConnectPeripheral");
-    NSLog(@"%@", err);
+    NSLog(@"err = %@", err);
     [self clearPeripheral];
     [self signalConnectionError];
 }
@@ -525,6 +530,25 @@ static void* robotThread(void* pArg);
 - (int) error
 {
     return error;
+}
+
+// Handle MiP robot disconnection request posted to the main thread by the worker thread.
+- (void) handleMiPDisconnect:(id) dummy
+{
+    error = MIP_ERROR_NONE;
+
+    if(!peripheral)
+        return;
+    [manager cancelPeripheralConnection:peripheral];
+}
+
+// The worker thread calls this selector to wait for the disconnection from the robot to complete.
+- (void) waitForDisconnectToComplete
+{
+    pthread_mutex_lock(&connectMutex);
+        while (peripheral)
+            pthread_cond_wait(&connectCondition, &connectMutex);
+    pthread_mutex_unlock(&connectMutex);
 }
 
 // Handle MiP robot discovery start request posted to the main thread by the worker thread.
@@ -644,7 +668,7 @@ static void* robotThread(void* pArg);
     else
     {
         NSLog(@"Unexpected characteristic %@", characteristic.UUID);
-        NSLog(@"%@", characteristic.value.bytes);
+        NSLog(@"characteristic = %@", characteristic.value.bytes);
     }
 }
 
@@ -762,6 +786,15 @@ int mipTransportConnectToRobot(MiPTransport* pTransport, const char* pRobotName)
     [g_appDelegate performSelectorOnMainThread:@selector(handleMiPConnect:) withObject:robotNameObject waitUntilDone:YES];
     [g_appDelegate waitForConnectToComplete];
     [robotNameObject release];
+
+    return [g_appDelegate error];
+}
+
+int mipTransportDisconnectFromRobot(MiPTransport* pTransport)
+{
+    [g_appDelegate performSelectorOnMainThread:@selector(handleMiPDisconnect:) withObject:nil waitUntilDone:YES];
+    [g_appDelegate waitForDisconnectToComplete];
+    sleep(1);
 
     return [g_appDelegate error];
 }
