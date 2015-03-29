@@ -12,6 +12,8 @@ This project is just a place for me to record any progress I make as I hack arou
 [[https://learn.sparkfun.com/tutorials/hacking-the-mip---proto-back | Hacking the MiP - Proto Back by Sparkfun]] \\
 [[https://github.com/WowWeeLabs/MiP-BLE-Protocol | WowWee MiP Bluetooth Low Energy Protocol Documentation on GitHub]] \\
 [[https://github.com/charcole/MiP-OSX | charcole's OS X MiP Sample on GitHub]]\\
+[[http://macetech.com/blog/node/126 | WowWee MiP Quick Teardown on macetech.com]]\\
+[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample | My OS X Core Bluetooth Console Sample]]\\
 
 
 
