@@ -15,6 +15,28 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==March 28, 2015
+I started experimenting with the commands from the
+[[https://github.com/WowWeeLabs/MiP-BLE-Protocol | WowWee MiP Bluetooth Low Energy Protocol]] after I completed the
+initial version of my OS X Core Bluetooth transport code.  During this experimentation I encountered a few issues in my
+code that I fixed before progressing further.  These issues included:
+* The mipTransportGetResponse() function would occasionally hang waiting for a response.  Sometimes the expected
+  responses just never arrived.  I updated mipTransportGetResponse() so that it can now detect if it has been waiting
+  for more than a second for such a response and if so, re-issue the request and try waiting again.  It will make a
+  maximum of MIP_MAXIMUM_REQEUST_RETRIES (2) retries before it gives up and returns MIP_ERROR_TIMEOUT to the caller.  I
+  would need to setup a BLE packet sniffer to determine who is really at fault here (OS X, the MiP, or me).  I decided a
+  better use of my time would be to just implement this retry logic instead.
+* I have had OS X connect to the MiP but the MiP not appear to switch to a connected state (its chest light stays
+  blue).  This most often happened if I quickly attempted to rerun my sample immediately after the previous run
+  completed.  I would get response timeouts from OS X when this happened.  I added a mipTransportDisconnectFromRobot()
+  API so that a developer can disconnect from a MiP robot and force a reconnection if they detect such problems.
+* I improved out of band response/notification handling.  Previously the developer could only retrieve the most recent
+  notification sent from the MiP.  I noticed that once the robot was moving around, more notifications were being
+  generated and this could make it easy for a developer to miss an important notification.  I switched to using a 10
+  item queue instead.  This allows the developer to now retrieve the most recent 10 responses.
+
+
+
 ==March 25, 2015
 I pushed up the
 [[https://github.com/adamgreen/MiP/tree/24b4e8b947e609dc6b1f6e8abb9538447bfcd6f1/OSX_ConsoleSample | first version of my OS X console sample]]
