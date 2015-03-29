@@ -29,6 +29,7 @@
 #define MIP_ERROR_NOT_CONNECTED 4 // No MiP robot connected.
 #define MIP_ERROR_NO_REQUEST    5 // Not waiting for a response from a request.
 #define MIP_ERROR_TIMEOUT       6 // Timed out waiting for response.
+#define MIP_ERROR_EMPTY         7 // The queue was empty.
 
 // expectResponse parameter values for mipTransportSendRequest() parameter.
 #define MIP_EXPECT_NO_RESPONSE 0
@@ -156,9 +157,9 @@ int mipTransportGetResponse(MiPTransport* pTransport,
 int mipTransportIsResponseAvailable(MiPTransport* pTransport);
 
 
-// Retrieve the last out of band response send by the MiP robot.
+// Get an out of band response sent by the MiP robot.
 // Sometimes the MiP robot sends notifications which aren't in direct response to the last request made.  This
-// function will return the most recent of such responses/notifications.
+// function will return one of these responses/notifications.
 //
 //   pTransport: An object that was previously returned from the mipTransportInit() call.
 //   pResponseBuffer: Is a pointer to the array of bytes into which the response should be copied.
@@ -166,10 +167,10 @@ int mipTransportIsResponseAvailable(MiPTransport* pTransport);
 //   pResponseLength: Is a pointer to where the actual number of bytes in the response should be placed.  This value
 //                    may be truncated to responseBufferSize if the actual response was > responseBufferSize.
 //   Returns: MIP_ERROR_NONE on success and a non-zero MIP_ERROR_* code otherwise.
-int mipTransportGetLastOutOfBandResponse(MiPTransport* pTransport,
-                                         uint8_t* pResponseBuffer,
-                                         size_t responseBufferSize,
-                                         size_t* pResponseLength);
+int mipTransportGetOutOfBandResponse(MiPTransport* pTransport,
+                                     uint8_t* pResponseBuffer,
+                                     size_t responseBufferSize,
+                                     size_t* pResponseLength);
 
 
 // UNDONE: The following is specific to OS X BLE transport implementation and should be moved at a later time.

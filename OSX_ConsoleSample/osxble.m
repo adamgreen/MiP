@@ -50,6 +50,9 @@ static void* robotThread(void* pArg);
 // Maximum number of retries for sending a request when the expected response isn't received.
 #define MIP_MAXIMUM_REQEUST_RETRIES 2
 
+// Size of out of band response queue.  The queue will overwrite the oldest item once this size is hit.
+#define MIP_OOB_RESPONSE_QUEUE_SIZE 10
+
 
 
 // This class contains the information for a single request and its matching response (if it has one).
@@ -190,6 +193,113 @@ static void* robotThread(void* pArg);
 
 
 
+// This class implements a fixed sized circular queue which supports push overflow.
+@interface MiPResponseQueue : NSObject
+{
+    struct Response
+    {
+        uint8_t length;
+        uint8_t content[MIP_RESPONSE_MAX_LEN];
+    } *pResponses;
+    size_t          alloc;
+    size_t          count;
+    size_t          push;
+    size_t          pop;
+    pthread_mutex_t mutex;
+}
+
+- (id) initWithSize:(size_t) itemCount;
+- (void) push:(const uint8_t*)pData length:(size_t)length;
+- (int)  pop:(uint8_t*)pBuffer size:(size_t)size actualLength:(size_t*)pActual;
+@end
+
+
+
+@implementation MiPResponseQueue
+// Initialize the response queue.  Allocate room for the specified number of responses in the queue.
+- (id) initWithSize:(size_t) itemCount
+{
+    int mutexInit = -1;
+
+    self = [super init];
+    if (!self)
+        goto Error;
+
+    pResponses = malloc(itemCount * sizeof(*pResponses));
+    if (!pResponses)
+        goto Error;
+    mutexInit = pthread_mutex_init(&mutex, NULL);
+    if (mutexInit)
+        goto Error;
+    alloc = itemCount;
+
+    return self;
+Error:
+    if (mutexInit == 0)
+        pthread_mutex_destroy(&mutex);
+    free(pResponses);
+    pResponses = NULL;
+    return nil;
+}
+
+// Free pthread synchronization objects when this object is finally freed.
+- (void) dealloc
+{
+    pthread_mutex_destroy(&mutex);
+    free(pResponses);
+    pResponses = NULL;
+    [super dealloc];
+}
+
+- (void) push:(const uint8_t*)pData length:(size_t)length
+{
+    size_t copyLen = length;
+    if (copyLen > sizeof(pResponses[0].content))
+        copyLen = sizeof(pResponses[0].content);
+    pthread_mutex_lock(&mutex);
+    {
+        memcpy(pResponses[push].content, pData, copyLen);
+        pResponses[push].length = copyLen;
+        push = (push + 1) % alloc;
+        if (count == alloc)
+        {
+            // Queue was already full so drop oldest item by advancing the pop index.
+            pop = (pop + 1) % alloc;
+        }
+        else
+        {
+            count++;
+        }
+    }
+    pthread_mutex_unlock(&mutex);
+}
+
+- (int)  pop:(uint8_t*)pBuffer size:(size_t)size actualLength:(size_t*)pActual
+{
+    int ret = MIP_ERROR_EMPTY;
+
+    pthread_mutex_lock(&mutex);
+    {
+        if (count > 0)
+        {
+            size_t copyLen = pResponses[pop].length;
+            if (copyLen > size)
+                copyLen = size;
+            memcpy(pBuffer, pResponses[pop].content, copyLen);
+            *pActual = copyLen;
+            pop = (pop + 1) % alloc;
+            count--;
+            ret = MIP_ERROR_NONE;
+        }
+    }
+    pthread_mutex_unlock(&mutex);
+
+    return ret;
+}
+@end
+
+
+
 // This is the delegate where most of the work on the main thread occurs.
 @interface MiPAppDelegate : NSObject <NSApplicationDelegate, CBCentralManagerDelegate, CBPeripheralDelegate>
 {
@@ -205,13 +315,11 @@ static void* robotThread(void* pArg);
     BOOL                autoConnect;
 
     pthread_mutex_t     connectMutex;
-    pthread_mutex_t     oobMutex;
     pthread_cond_t      connectCondition;
     pthread_t           thread;
 
-    // Out of band MiP responses.
-    uint8_t             oobResponse[MIP_RESPONSE_MAX_LEN];
-    uint8_t             oobResponseLength;
+    // Out of band MiP responses go into this queue.
+    MiPResponseQueue*   responseQueue;
 }
 
 - (id) initForApp:(NSApplication*) app;
@@ -228,7 +336,7 @@ static void* robotThread(void* pArg);
 - (NSUInteger) getDiscoveredRobotCount;
 - (NSString*) getDiscoveredRobotAtIndex:(NSUInteger) index;
 - (void) handleMiPRequest:(id) request;
-- (void) copyOobResponse:(uint8_t*) pOobResponse length:(size_t) len actualLength:(size_t*) pActual;
+- (int) popOobResponse:(uint8_t*) pOobResponse size:(size_t) size actualLength:(size_t*) pActual;
 - (void) handleQuitRequest:(id) dummy;
 - (void) startScan;
 - (void) stopScan;
@@ -242,9 +350,8 @@ static void* robotThread(void* pArg);
 // Also adds itself as the delegate to the main NSApplication object.
 - (id) initForApp:(NSApplication*) app;
 {
-    int ret = -1;
-    int responseInit = -1;
-    int notificationInit = -1;
+    int connectMutexResult = -1;
+    int connectConditionResult = -1;
 
     self = [super init];
     if (!self)
@@ -252,27 +359,29 @@ static void* robotThread(void* pArg);
 
     discoveredRobots = [[NSMutableArray alloc] init];
     if (!discoveredRobots)
-        return nil;
+        goto Error;
+    responseQueue = [[MiPResponseQueue alloc] initWithSize:MIP_OOB_RESPONSE_QUEUE_SIZE];
+    if (!responseQueue)
+        goto Error;
 
-    ret = pthread_mutex_init(&connectMutex, NULL);
-    if (ret)
-        return nil;
-    ret = pthread_mutex_init(&oobMutex, NULL);
-    if (ret)
-    {
-        pthread_mutex_destroy(&connectMutex);
-        return nil;
-    }
-    ret = pthread_cond_init(&connectCondition, NULL);
-    if (ret)
-    {
-        pthread_mutex_destroy(&oobMutex);
-        pthread_mutex_destroy(&connectMutex);
-        return nil;
-    }
+    connectMutexResult = pthread_mutex_init(&connectMutex, NULL);
+    if (connectMutexResult)
+        goto Error;
+    connectConditionResult = pthread_cond_init(&connectCondition, NULL);
+    if (connectConditionResult)
+        goto Error;
 
     [app setDelegate:self];
     return self;
+
+Error:
+    if (connectConditionResult == 0)
+        pthread_cond_destroy(&connectCondition);
+    if (connectMutexResult == 0)
+        pthread_mutex_destroy(&connectMutex);
+    [responseQueue release];
+    [discoveredRobots release];
+    return nil;
 }
 
 
@@ -299,6 +408,8 @@ static void* robotThread(void* pArg);
     }
 
     // Free up resources here rather than dealloc which doesn't appear to be called during NSApplication shutdown.
+    [responseQueue release];
+    responseQueue = nil;
     [discoveredRobots release];
     discoveredRobots = nil;
 
@@ -307,7 +418,6 @@ static void* robotThread(void* pArg);
 
     pthread_cond_destroy(&connectCondition);
     pthread_mutex_destroy(&connectMutex);
-    pthread_mutex_destroy(&oobMutex);
 }
 
 // Request CBCentralManager to stop scanning for MiP robots.
@@ -657,12 +767,8 @@ static void* robotThread(void* pArg);
         }
         else
         {
-            NSLog(@"OOB = %@", [[[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding] autorelease]);
             // Received Out of Band response from MiP.
-            pthread_mutex_lock(&oobMutex);
-                memcpy(oobResponse, response, responseLength);
-                oobResponseLength = responseLength;
-            pthread_mutex_unlock(&oobMutex);
+            [responseQueue push:response length:responseLength];
         }
     }
     else
@@ -698,15 +804,9 @@ static int parseHexDigit(uint8_t digit)
 
 // The worker thread calls this selector to make a deep copy of the out of band response data.  These out of band
 // responses are notifications sent from MiP robot even though no explicit request has been made.
-- (void) copyOobResponse:(uint8_t*) pOobResponse length:(size_t) len actualLength:(size_t*) pActual
+- (int) popOobResponse:(uint8_t*) pOobResponse size:(size_t) size actualLength:(size_t*) pActual
 {
-    pthread_mutex_lock(&oobMutex);
-        size_t length = oobResponseLength;
-        if (length > len)
-            length = len;
-        memcpy(pOobResponse, oobResponse, length);
-        *pActual = length;
-    pthread_mutex_unlock(&oobMutex);
+    return [responseQueue pop:pOobResponse size:size actualLength:pActual];
 }
 
 // Invoked whenever the central manager's state is updated.
@@ -890,8 +990,7 @@ int mipTransportIsResponseAvailable(MiPTransport* pTransport)
     return ![g_lastRequest waitingForResponse];
 }
 
-int mipTransportGetLastOutOfBandResponse(MiPTransport* pTransport, uint8_t* pResponseBuffer, size_t responseBufferSize, size_t* pResponseLength)
+int mipTransportGetOutOfBandResponse(MiPTransport* pTransport, uint8_t* pResponseBuffer, size_t responseBufferSize, size_t* pResponseLength)
 {
-    [g_appDelegate copyOobResponse:pResponseBuffer length:responseBufferSize actualLength:pResponseLength];
-    return MIP_ERROR_NONE;
+    return [g_appDelegate popOobResponse:pResponseBuffer size:responseBufferSize actualLength:pResponseLength];
 }
