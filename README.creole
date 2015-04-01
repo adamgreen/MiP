@@ -14,6 +14,72 @@ This project is just a place for me to record any progress I make as I hack arou
 [[https://github.com/charcole/MiP-OSX | charcole's OS X MiP Sample on GitHub]]\\
 [[http://macetech.com/blog/node/126 | WowWee MiP Quick Teardown on macetech.com]]\\
 [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample | My OS X Core Bluetooth Console Sample]]\\
+[[https://github.com/WowWeeLabs/MiP-iOS-SDK#readme | Official WowWee MiP iOS SDK]]\\
+
+
+
+==March 31, 2015
+I have found another very useful reference for helping to understand the MiP commands.  The
+[[https://github.com/WowWeeLabs/MiP-iOS-SDK/blob/master/WowWeeMiPSDK.framework/Headers/MipCommandValues.h | MipCommandValues.h]]
+header in the official WowWee MiP iOS SDK provides additional information about the protocol, such as the
+[[https://github.com/WowWeeLabs/MiP-iOS-SDK/blob/master/WowWeeMiPSDK.framework/Headers/MipCommandValues.h#L522 | kMipSoundFileValue enumeration]]
+describing the sounds which can be played.
+
+I finished my initial experimentation with several of the MiP commands and it looks like it will enable the creation of
+a few cool projects.  As I went through this process I did encounter a few issues that I thought I would highlight here:
+* **Set MiP Volume (0x15)** - This is one of the first commands that I played around with so that the robot wouldn't be
+  so loud when it made its sounds to announce that I had disconnected from it.  The volume level can be set to values
+  between 0 and 7: where 0 is off, 1 is low volume, and 7 is the highest volume setting.  Once you set the volume, it is
+  remembered across power cycles.
+* **Distance Drive (0x70)** - I noticed a few things when experimenting with this command:
+** When I commanded it to drive a particular distance, it always seemed to drive a little further than requested.  I
+   also noticed that the robot oscillated back and forth by as much as +/- 2cm to maintain its balance so that made it
+   difficult to get an accurate measurement of how much the robot actually travelled.  This means that I wouldn't be
+   able to use this command to drive through a course using dead reckoning alone.  I will just have to get more
+   creative :)
+** I would note that the turning control seemed to be pretty accurate.  It could pull off decent 90 degree turns when
+   commanded to do so.
+** This driving command can be used to execute turns and forward/reverse translations at the same time.  If you ask it
+   to turn by a few degrees and drive ahead a longer distance, both the turn and traversal will start at the same time
+   but the turn and traversal are not interpolated to complete at the same time.  The turning will finish earlier and
+   then it will just continue driving straight from that point.
+** Multiples of these commands can be sent to the MiP and it will queue them up to be executed one after another.  The
+   documentation indicates that the queue can hold 20 such requests.  I only tested with 2 and they worked as expected.
+** I found that the turns performed by this command were in the opposite direction from what the protocol documentation
+   indicated.  When looking down at the robot, a clockwise command would produce a counter-clockwise rotation and vice
+   versa. I [[https://github.com/WowWeeLabs/MiP-BLE-Protocol/pull/8 | updated the documentation]] to flip these around
+   to match what I actually see when using the command with the robot.  It should be noted that most of the other turn
+   related commands used right/left terminology instead of clockwise/anti-clockwise descriptions in the protocol
+   documentation.
+* **Continuous Drive (0x78)** - At first I couldn't get this command to work at all.  As I did more investigation I
+  figured out a few things to get it working:
+** You need to keep sending this command quite regularly or the bot will stop moving.  50 msecs as mentioned in the
+   protocol documentation for this command appears to be a good interval to use.  It is also the interval that gets used
+   in WowWee's MiP iOS SDK sample program as seen
+   [[https://github.com/WowWeeLabs/MiP-iOS-SDK/blob/a2dd6723e9460808bf48ec8e90f92ba6a98803b6/SampleProject/SampleProject/DriveViewController.m#L44 | here]].
+** Initially the forward motion would always be jerky when I used this command, no matter what interval I used (I tried
+   both lower and higher than 50 msecs).  To investigate this issue further I wanted to sniff the BLE packets being sent
+   from my MacBook to the MiP.  **Apple's Hardware IO Tools for Xcode** includes the **Packet Logger** utility which can
+    do exactly that.  Once I had that installed, I discovered that my test application was taking 100 msecs to complete
+    each Continuous Drive command before it would allow the next one to be sent.  The log showed that OS X would
+    issue **ATT Send** packets and then wait almost 100 msecs for the **ATT Receive** packet to come back from the MiP
+    before it progressed to the next packet.  I then changed the type used with
+    the **writeValue:forCharacteristic:type:** selector call from CBCharacteristicWriteWithResponse
+    to **CBCharacteristicWriteWithoutResponse**.  That change eliminated the delay and the MiP would then respond more
+    smoothly.
+** The documentation for this command indicates that it used 2 bytes of data but the description of the data seemed to
+   indicate that only a single byte was sent.  It turns out that 2 bytes are actually required.  The first byte
+   indicates the forward/reverse velocity with values between 0x01 and 0x40.  The second byte indicates the amount of
+   rotation desired with values between 0x41 and 0x80. I
+   [[https://github.com/WowWeeLabs/MiP-BLE-Protocol/pull/8 | updated the documentation]] to make this requirement
+   clearer.
+* **Read Odometer (0x85)** - The odometer on the MiP functions similar to that in a car.  It tracks total distance
+  travelled, even across power cycles.  It is only reset to 0 when the **Reset Odometer (0x86)** is sent to the robot.
+* **Set Gesture Or Radar Mode (0x0C)** - I found that placing the robot in "Gesture Mode" will cause the robot to
+  issue **Gesture Detect (0x0A)** notifications but it appears to pop the MiP out of App mode and into Default MiP mode.
+  Placing the MiP in "Radar Mode" appears to leave the MiP in App mode so that it can still be controlled via BLE
+  while **Radar Response (0x0C)** notifications are sent to let the app know when objects appear and disappear from the
+  front of the bot.
 
 
 
