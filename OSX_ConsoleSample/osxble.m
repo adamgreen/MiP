@@ -721,7 +721,7 @@ Error:
     }
 
     // Send request to MiP robot via Core Bluetooth.
-    [peripheral writeValue:cmdData forCharacteristic:sendDataWriteCharacteristic type:CBCharacteristicWriteWithResponse];
+    [peripheral writeValue:cmdData forCharacteristic:sendDataWriteCharacteristic type:CBCharacteristicWriteWithoutResponse];
 
     // If there is no response then this release will free the object now that we don't need it anymore.
     // If there will be a response then there are already another 2 additional references to keep it alive until the
