@@ -18,6 +18,28 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==April 4, 2015
+I have been continuing to experiment with the BLE transport code that I implemented earlier in the week and so far it
+appears to be holding up well.  I do still need to add support for auto-reconnecting if the BLE connection should go
+down.  As part of that experimentation, I have implemented the beginnings of a basic wall following algorithm in the
+[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample | OSX_ConsoleSample]] and pushed it up to GitHub
+earlier this morning.
+* It starts out by waiting for the user to pick up the robot and place it facing the wall at a distance < 10cm.  
+* Once the code detects that it has been facing the wall at < 10cm for 5 seconds, it is ready to start.
+* It backs away from the wall until it no longer detects the wall with its IR sensors.
+* The MiP then turns left by 120 degrees.  This causes it to face away from the wall a bit.
+* The robot then starts traveling forward, arcing to the right towards the wall.
+* Once a wall or obstacle is detected it stops and turns to the left, away from the wall/obstacle.  It then loops back
+  to the previous step, arcing back towards the wall.
+
+===Next Steps
+I am going to start implementing a higher level API on top of the existing mipTransport*() API. The initial priority
+will be to implement the functionality that I am currently utilizing in my wall following sample (enabling radar mode,
+continuous drive, set chest LED colour, etc.)  The final goal will be to implement developer friendly wrappers for all
+of the documented MiP commands.
+
+
+
 ==March 31, 2015
 I have found another very useful reference for helping to understand the MiP commands.  The
 [[https://github.com/WowWeeLabs/MiP-iOS-SDK/blob/master/WowWeeMiPSDK.framework/Headers/MipCommandValues.h | MipCommandValues.h]]
