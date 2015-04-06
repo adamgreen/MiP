@@ -18,6 +18,17 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==April 5, 2015
+I started implementing and documenting the new high level MiP C API this weekend.\\
+[[https://github.com/adamgreen/MiP/blob/master/OSX_ConsoleSample/mip.h | MiP C API Header File]]\\
+[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#readme | MiP C API Documentation]]\\
+
+The public MiP C API functions that have been implemented so far are just light wrappers around the lower level
+transport API that I already had in place.  I am now going to start implementing functions for MiP features such as
+continuous drive, setting chest LEDs, etc.
+
+
+
 ==April 4, 2015
 I have been continuing to experiment with the BLE transport code that I implemented earlier in the week and so far it
 appears to be holding up well.  I do still need to add support for auto-reconnecting if the BLE connection should go
