@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include "mip.h"
+#include "osxble.h"
 
 
 // States for state machine.
@@ -43,9 +44,9 @@ typedef struct Notifications
 
 
 // Forward function declarations.
-static Notifications latestNotifications(MiPTransport* pTransport);
-static void updateChestColourBasedOnRadarRange(MiPTransport* pTransport, uint8_t radarResult);
-static void displayNotifications(MiPTransport* pTransport);
+static Notifications latestNotifications(MiP* pMiP);
+static void updateChestColourBasedOnRadarRange(MiP* pMiP, uint8_t radarResult);
+static void displayNotifications(MiP* pMiP);
 
 
 int main(int argc, char *argv[])
@@ -67,8 +68,8 @@ void robotMain(void)
     uint8_t         response[MIP_RESPONSE_MAX_LEN];
 
     // Connect to the first MiP robot discovered.
-    MiPTransport* pTransport = mipTransportInit(NULL);
-    mipTransportConnectToRobot(pTransport, NULL);
+    MiP* pMiP = mipInit(NULL);
+    mipConnectToRobot(pMiP, NULL);
 
     printf("Enable radar mode\n");
     do
@@ -77,9 +78,8 @@ void robotMain(void)
         static const uint8_t getRadarModeState[] = "\x0D";
 
         // Keep trying until it goes through.
-        mipTransportSendRequest(pTransport, enableRadar, sizeof(enableRadar)-1, MIP_EXPECT_NO_RESPONSE);
-        mipTransportSendRequest(pTransport, getRadarModeState, sizeof(getRadarModeState)-1, MIP_EXPECT_RESPONSE);
-        mipTransportGetResponse(pTransport, response, sizeof(response), &responseLength);
+        mipRawSend(pMiP, enableRadar, sizeof(enableRadar)-1);
+        mipRawReceive(pMiP, getRadarModeState, sizeof(getRadarModeState)-1, response, sizeof(response), &responseLength);
     } while (responseLength != 2 || response[1] != 0x04);
     printf("Radar mode enabled\n");
 
@@ -87,8 +87,8 @@ void robotMain(void)
     do
     {
         gettimeofday(&currentTime, NULL);
-        notifications = latestNotifications(pTransport);
-        updateChestColourBasedOnRadarRange(pTransport, notifications.radar);
+        notifications = latestNotifications(pMiP);
+        updateChestColourBasedOnRadarRange(pMiP, notifications.radar);
 
         switch (state)
         {
@@ -120,7 +120,7 @@ void robotMain(void)
             {
                 // Back up until radar can't see wall anymore.
                 static const uint8_t driveBackwards[] = "\x78\x30\x00";
-                mipTransportSendRequest(pTransport, driveBackwards, sizeof(driveBackwards)-1, MIP_EXPECT_NO_RESPONSE);
+                mipRawSend(pMiP, driveBackwards, sizeof(driveBackwards)-1);
             }
             else
             {
@@ -137,7 +137,7 @@ void robotMain(void)
                 // Now issue turn left command.
                 printf("Turning left\n");
                 static const uint8_t turnLeft[] = "\x73\x18\x10";
-                mipTransportSendRequest(pTransport, turnLeft, sizeof(turnLeft)-1, MIP_EXPECT_NO_RESPONSE);
+                mipRawSend(pMiP, turnLeft, sizeof(turnLeft)-1);
                 cyclesToWait = 10;
                 state = TURNING_LEFT;
             }
@@ -156,14 +156,14 @@ void robotMain(void)
             {
                 // Drive forward with a bit of a turn to the right until wall/obstacle is detected.
                 static const uint8_t driveForwardRight[] = "\x78\x08\x41";
-                mipTransportSendRequest(pTransport, driveForwardRight, sizeof(driveForwardRight)-1, MIP_EXPECT_NO_RESPONSE);
+                mipRawSend(pMiP, driveForwardRight, sizeof(driveForwardRight)-1);
             }
             else
             {
                 // Once wall/obstacle is detected, we should start turning away from wall.
                 printf("Driving away from wall\n");
                 static const uint8_t stop[] = "\x77";
-                mipTransportSendRequest(pTransport, stop, sizeof(stop)-1, MIP_EXPECT_NO_RESPONSE);
+                mipRawSend(pMiP, stop, sizeof(stop)-1);
                 cyclesToWait = 20;
                 state = TURN_AWAY;
             }
@@ -176,7 +176,7 @@ void robotMain(void)
             {
                 // Keep turning away from wall for a minimum amount of time and until wall/obstacle is no longer in view.
                 static const uint8_t turnLeft[] = "\x78\x00\x62";
-                mipTransportSendRequest(pTransport, turnLeft, sizeof(turnLeft)-1, MIP_EXPECT_NO_RESPONSE);
+                mipRawSend(pMiP, turnLeft, sizeof(turnLeft)-1);
             }
             else
             {
@@ -194,23 +194,22 @@ void robotMain(void)
 
     // Get volume setting just to send a command that will wait for a response before quiting.
     static const uint8_t getVolumeLevel[] = "\x16";
-    mipTransportSendRequest(pTransport, getVolumeLevel, sizeof(getVolumeLevel)-1, MIP_EXPECT_RESPONSE);
-    mipTransportGetResponse(pTransport, response, sizeof(response), &responseLength);
+    mipRawReceive(pMiP, getVolumeLevel, sizeof(getVolumeLevel)-1, response, sizeof(response), &responseLength);
     printf("Volume level = %u\n", response[1]);
 
     // Dump out of band notifications sent from MiP during this session.
-    displayNotifications(pTransport);
+    displayNotifications(pMiP);
 
-    mipTransportUninit(pTransport);
+    mipUninit(pMiP);
 }
 
-static Notifications latestNotifications(MiPTransport* pTransport)
+static Notifications latestNotifications(MiP* pMiP)
 {
     static Notifications latestNotifications;
     size_t               responseLength = 0;
     uint8_t              response[MIP_RESPONSE_MAX_LEN];
 
-    while (MIP_ERROR_NONE == mipTransportGetOutOfBandResponse(pTransport, response, sizeof(response), &responseLength))
+    while (MIP_ERROR_NONE == mipRawReceiveNotification(pMiP, response, sizeof(response), &responseLength))
     {
         // Must have at least one byte to indicate which response is being given.
         if (responseLength < 1)
@@ -240,7 +239,7 @@ static Notifications latestNotifications(MiPTransport* pTransport)
     return latestNotifications;
 }
 
-static void updateChestColourBasedOnRadarRange(MiPTransport* pTransport, uint8_t radarResult)
+static void updateChestColourBasedOnRadarRange(MiP* pMiP, uint8_t radarResult)
 {
     static uint8_t lastRadarResult = 0x00;
     uint8_t        chestColourCommand[] = { 0x84, 0x00, 0x00, 0x00 };
@@ -272,11 +271,11 @@ static void updateChestColourBasedOnRadarRange(MiPTransport* pTransport, uint8_t
     default:
         break;
     }
-    mipTransportSendRequest(pTransport, chestColourCommand, sizeof(chestColourCommand)-1, MIP_EXPECT_NO_RESPONSE);
+    mipRawSend(pMiP, chestColourCommand, sizeof(chestColourCommand)-1);
 }
 
-static void displayNotifications(MiPTransport* pTransport)
+static void displayNotifications(MiP* pMiP)
 {
     // The current latestRadarNotification() function prints all notifications that it encounters.
-    latestNotifications(pTransport);
+    latestNotifications(pMiP);
 }

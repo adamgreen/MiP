@@ -21,6 +21,8 @@
 #import <pthread.h>
 #import <sys/time.h>
 #import "mip.h"
+#import "mip-transport.h"
+#import "osxble.h"
 
 
 // Forward Declarations.
@@ -864,17 +866,24 @@ static void* robotThread(void* pArg)
     return NULL;
 }
 
+struct MiPTransport
+{
+    MiPRequestResponse* lastRequest; // Remember last request here that requires a response.
+};
+
+
 
 MiPTransport* mipTransportInit(const char* pInitOptions)
 {
-    // Don't actually need a MiPTransport object so just return non-null value and cast appropriately.
-    return (MiPTransport*)1;
+    MiPTransport* pTransport = calloc(1, sizeof(*pTransport));
+    return pTransport;
 }
 
 void mipTransportUninit(MiPTransport* pTransport)
 {
-    // Nothing to do here.
-    return;
+    if (!pTransport)
+        return;
+    free(pTransport);
 }
 
 int mipTransportConnectToRobot(MiPTransport* pTransport, const char* pRobotName)
@@ -925,9 +934,6 @@ int mipTransportStopRobotDiscovery(MiPTransport* pTransport)
     return [g_appDelegate error];
 }
 
-// Remember last request here that requires a response.
-static MiPRequestResponse* g_lastRequest;
-
 int mipTransportSendRequest(MiPTransport* pTransport, const uint8_t* pRequest, size_t requestLength, int expectResponse)
 {
     MiPRequestResponse* p = [[MiPRequestResponse alloc] initWithRequest:pRequest
@@ -939,7 +945,7 @@ int mipTransportSendRequest(MiPTransport* pTransport, const uint8_t* pRequest, s
     if (expectResponse)
     {
         [p retain];
-        g_lastRequest = p;
+        pTransport->lastRequest = p;
     }
     [g_appDelegate performSelectorOnMainThread:@selector(handleMiPRequest:) withObject:p waitUntilDone:YES];
     return [g_appDelegate error];
@@ -947,7 +953,7 @@ int mipTransportSendRequest(MiPTransport* pTransport, const uint8_t* pRequest, s
 
 int mipTransportGetResponse(MiPTransport* pTransport, uint8_t* pResponseBuffer, size_t responseBufferSize, size_t* pResponseLength)
 {
-    if (!g_lastRequest)
+    if (!pTransport->lastRequest)
         return MIP_ERROR_NO_REQUEST;
     if ([g_appDelegate error])
         return [g_appDelegate error];
@@ -956,12 +962,12 @@ int mipTransportGetResponse(MiPTransport* pTransport, uint8_t* pResponseBuffer, 
     BOOL waitResult = FALSE;
     do
     {
-        waitResult = [g_lastRequest waitForResponse];
+        waitResult = [pTransport->lastRequest waitForResponse];
         if (!waitResult && retries > 0)
         {
             NSLog(@"Retrying request");
-            [g_lastRequest retain];
-            [g_appDelegate performSelectorOnMainThread:@selector(handleMiPRequest:) withObject:g_lastRequest waitUntilDone:YES];
+            [pTransport->lastRequest retain];
+            [g_appDelegate performSelectorOnMainThread:@selector(handleMiPRequest:) withObject:pTransport->lastRequest waitUntilDone:YES];
         }
     } while (!waitResult && retries-- > 0);
     if (!waitResult)
@@ -970,24 +976,24 @@ int mipTransportGetResponse(MiPTransport* pTransport, uint8_t* pResponseBuffer, 
         return MIP_ERROR_TIMEOUT;
     }
 
-    size_t srcLength = [g_lastRequest responseLength];
+    size_t srcLength = [pTransport->lastRequest responseLength];
     size_t copyLength = srcLength;
     if (copyLength > responseBufferSize)
         copyLength = responseBufferSize;
-    memcpy(pResponseBuffer, [g_lastRequest response], copyLength);
+    memcpy(pResponseBuffer, [pTransport->lastRequest response], copyLength);
     *pResponseLength = copyLength;
 
-    [g_lastRequest release];
-    g_lastRequest = nil;
+    [pTransport->lastRequest release];
+    pTransport->lastRequest = nil;
 
     return MIP_ERROR_NONE;
 }
 
 int mipTransportIsResponseAvailable(MiPTransport* pTransport)
 {
-    if (!g_lastRequest)
+    if (!pTransport->lastRequest)
         return FALSE;
-    return ![g_lastRequest waitingForResponse];
+    return ![pTransport->lastRequest waitingForResponse];
 }
 
 int mipTransportGetOutOfBandResponse(MiPTransport* pTransport, uint8_t* pResponseBuffer, size_t responseBufferSize, size_t* pResponseLength)

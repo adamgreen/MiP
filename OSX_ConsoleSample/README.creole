@@ -1,0 +1,539 @@
+=MiP C API
+The **MiP C API** was created to give a C language abstraction for the operations supported by the
+[[https://github.com/WowWeeLabs/MiP-BLE-Protocol | WowWee MiP Mobile self-balancing Inverted Pendulum  robot protocol]].
+The transport (Bluetooth Low Energy or UART) being used will be abstracted behind this API as much as possible.  This
+means that a developer could for example start development on an OS X machine using the BLE transport and later migrate
+to a microcontroller connected directly to the MiP's UART.
+
+==Supported Transports
+* **OS X - Bluetooth Low Energy** - This is the initial transport currently being developed.
+
+==OS X - Bluetooth Low Energy Notes
+On a platform like OS X it would be typical to write a Cocoa UI application that responds to events.  The
+[[https://github.com/WowWeeLabs/MiP-iOS-SDK#readme | Official WowWee iOS SDK]] is an example of a framework that works
+in such an environment.  Since one of the purposes of this **MiP C API** is to allow easier migration to
+microcontrollers for complete autonomy, this API attempts to hide that event driven behavior from the developer.  It
+accomplishes this by having the main thread call **osxMiPInitAndRun()** which runs the main NSApplication event loop and
+starts up a worker thread to execute the developer's code in a more sequential manner.  The developer just needs to
+implement **robotMain()** to provide the code to be run in that worker thread.  It is expected that the developer's OS X
+applications are written to be console applications.  For OS X GUI based applications, it would be better to create an
+OS X port of the [[https://github.com/WowWeeLabs/MiP-iOS-SDK#readme | Official WowWee iOS SDK]] and use it instead.
+
+**OS X Example**\\
+{{{
+int main(int argc, char *argv[])
+{
+    // Initialize the Core Bluetooth stack on this the main thread and start the worker robot thread to run the
+    // code found in robotMain() below.
+    osxMiPInitAndRun();
+    return 0;
+}
+
+
+void robotMain(void)
+{
+    // Your robot code goes here.
+}
+}}}
+**TODO:** Add some simple example code to robotMain() once I have enough API together to use it.
+
+
+==Reference
+===Error Codes
+|= Error                    |= Value    |= Description                              |
+| MIP_ERROR_NONE            | 0         | Success                                   |
+| MIP_ERROR_CONNECT         | 1         | Connection to MiP failed                  |
+| MIP_ERROR_PARAM           | 2         | Invalid parameter passed to API           |
+| MIP_ERROR_MEMORY          | 3         | Out of memory                             |
+| MIP_ERROR_NOT_CONNECTED   | 4         | No MiP robot connected                    |
+| MIP_ERROR_NO_REQUEST      | 5         | Not waiting for a response from a request |
+| MIP_ERROR_TIMEOUT         | 6         | Timed out waiting for response            |
+| MIP_ERROR_EMPTY           | 7         | The queue was empty                       |
+
+
+===API by Function
+|= Function         |= API                                                          |
+| Initialization    | [[#mipInit | mipInit]]                                        |
+|                   | [[#mipUninit | mipUninit]]                                    |
+| Connection        | [[#mipConnectToRobot | mipConnectToRobot]]                    |
+|                   | [[#mipDisconnectFromRobot | mipDisconnectFromRobot]]          |
+| Discovery         | [[#mipStartRobotDiscovery | mipStartRobotDiscovery]]          |
+|                   | [[#mipGetDiscoveredRobotCount | mipGetDiscoveredRobotCount]]  |
+|                   | [[#mipGetDiscoveredRobotName | mipGetDiscoveredRobotName]]    |
+|                   | [[#mipStopRobotDiscovery | mipStopRobotDiscovery]]            |
+| Raw               | [[#mipRawSend | mipRawSend]]                                  |
+|                   | [[#mipRawReceive | mipRawReceive]]                            |
+|                   | [[#mipRawReceiveNotification | mipRawReceiveNotification]]    |
+
+
+===API by Name
+| [[#mipConnectToRobot | mipConnectToRobot]]                    |
+| [[#mipDisconnectFromRobot | mipDisconnectFromRobot]]          |
+| [[#mipGetDiscoveredRobotCount | mipGetDiscoveredRobotCount]]  |
+| [[#mipGetDiscoveredRobotName | mipGetDiscoveredRobotName]]    |
+| [[#mipInit | mipInit]]                                        |
+| [[#mipRawReceive | mipRawReceive]]                            |
+| [[#mipRawReceiveNotification | mipRawReceiveNotification]]    |
+| [[#mipRawSend | mipRawSend]]                                  |
+| [[#mipStartRobotDiscovery | mipStartRobotDiscovery]]          |
+| [[#mipStopRobotDiscovery | mipStopRobotDiscovery]]            |
+| [[#mipUninit | mipUninit]]                                    |
+
+
+===mipInit
+{{{MiP* mipInit(const char* pInitOptions);}}}\\
+Is the first mip*() function that should be called by the developer.  It allocates and returns the MiP* pointer used as
+the first parameter in all subsequent mip*() function calls.
+
+**Parameters:**
+* pInitOptions: A character string which originates with the user.  It is transport specific.  At this point all
+  supported transports ignore the parameter so it can be set to NULL.
+
+**Returns:**
+* NULL on error.
+* A valid pointer to a MiP object otherwise.  This pointer is used as the first parameter in all subsequent mip*()
+  function calls.
+
+
+===mipUninit
+{{{void mipUninit(MiP* pMiP);}}}\\
+Is the last mip*() function that should be called by the developer.  It is used to cleanly shutdown the transport and
+any other resources used by the MiP API.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+
+
+===mipConnectToRobot
+{{{int mipConnectToRobot(MiP* pMiP, const char* pRobotName);}}}\\
+Called to connect to the desired MiP robot.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pRobotName: The name of the robot to which a connection should be made.  This parameter can be NULL to indicate the
+  default robot should be used.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**OS X BLE Transport Notes:**
+* If **pRobotName** is set to NULL then connect to the first MiP robot discovered by BLE.
+* A list of valid names for **pRobotName** can be found through the use of the mipStartRobotDiscovery(),
+  mipGetDiscoveredRobotCount(), mipGetDiscoveredRobotName(), and mipStopRobotDiscovery() functions.
+* Sometimes OS X successfully connects to a MiP but the MiP doesn't response to commands or switch the chest LED to be
+  lit green.  It acts like the BLE device in the MiP is connected to OS X but the main processor within the MiP was too
+  busy when the connection occurred so it doesn't switch state properly.  Future MiP C API calls which expect a response
+  from the MiP will receive MIP_ERROR_TIMEOUT errors.  The developer could detect these errors and force a disconnect
+  and a new connection.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int result = -1;
+    MiP* pMiP = mipInit(NULL);
+
+    printf("\tExample - Connect and disconnect from default MiP.\n"
+           "\tShould see chest LED turn green on successful connection and\n"
+           "\tswitch back to blue shortly after once disconnected.\n");
+
+    // Connect to default MiP robot.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    // Do stuff with the MiP robot.
+
+    // Disconnect and shutdown the application.
+    result = mipDisconnectFromRobot(pMiP);
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipDisconnectFromRobot
+{{{int mipDisconnectFromRobot(MiP* pMiP);}}}\\
+Called to disconnect from the current MiP robot.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* Doesn't need to be called for a clean shutdown as mpiUninit() will take care of disconnecting from any active robots
+  as part of the transport layer cleanup.
+* This API exists incase the developer wants to explicitly disconnect from a MiP during execution and connect to
+  another.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int result = -1;
+    MiP* pMiP = mipInit(NULL);
+
+    printf("\tExample - Connect and disconnect from default MiP.\n"
+           "\tShould see chest LED turn green on successful connection and\n"
+           "\tswitch back to blue shortly after once disconnected.\n");
+
+    // Connect to default MiP robot.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    // Do stuff with the MiP robot.
+
+    // Disconnect and shutdown the application.
+    result = mipDisconnectFromRobot(pMiP);
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipStartRobotDiscovery
+{{{int mipStartRobotDiscovery(MiP* pMiP);}}}\\
+Starts the process of discovering MiP robots to which a connection can be made. This discovery process will continue
+until mipStopRobotDiscovery() is called.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The discovery process is only used with BLE transports to find nearby MiP robots.  If connecting directly to the MiP
+  via the UART transport then discovery isn't necessary.
+* Once the discovery process has started, the mipGetDiscoveredRobotCount() and mipGetDiscoveredRobotName() functions can
+  be called to query the current list of robots.  Those functions can still be called after calling
+  mipStopRobotDiscovery() but no new robots will be added to the list.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int         result = -1;
+    size_t      robotCount = 0;
+    const char* pRobotName = NULL;
+    MiP*        pMiP = mipInit(NULL);
+
+    printf("\tExample - Discover MiP robots to which a connection can be made.\n"
+           "\tShould see first MiP robot be listed when it is powered up near\n"
+           "\tthe test machine.\n");
+    result = mipStartRobotDiscovery(pMiP);
+    do
+    {
+        result = mipGetDiscoveredRobotCount(pMiP, &robotCount);
+    } while (robotCount == 0);
+    result = mipGetDiscoveredRobotName(pMiP, 0, &pRobotName);
+    printf("\tDiscovered %s\n", pRobotName);
+    result = mipStopRobotDiscovery(pMiP);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetDiscoveredRobotCount
+{{{int mipGetDiscoveredRobotCount(MiP* pMiP, size_t* pCount);}}}\\
+Query how many MiP robots the discovery process has found so far.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pCount: A pointer to where the current count of robots should be placed.  Shouldn't be NULL.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The discovery process is only used with BLE transports to find nearby MiP robots.  If connecting directly to the MiP
+  via the UART transport then discovery isn't necessary.
+* The discovery process should be started by calling mipStartRobotDiscovery() before calling this function.
+* The count returned by this function can increase (if more and more robots are discovered over time) until
+  mipStopRobotDiscovery() is called.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int         result = -1;
+    size_t      robotCount = 0;
+    const char* pRobotName = NULL;
+    MiP*        pMiP = mipInit(NULL);
+
+    printf("\tExample - Discover MiP robots to which a connection can be made.\n"
+           "\tShould see first MiP robot be listed when it is powered up near\n"
+           "\tthe test machine.\n");
+    result = mipStartRobotDiscovery(pMiP);
+    do
+    {
+        result = mipGetDiscoveredRobotCount(pMiP, &robotCount);
+    } while (robotCount == 0);
+    result = mipGetDiscoveredRobotName(pMiP, 0, &pRobotName);
+    printf("\tDiscovered %s\n", pRobotName);
+    result = mipStopRobotDiscovery(pMiP);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetDiscoveredRobotName
+{{{int mipGetDiscoveredRobotName(MiP* pMiP, size_t robotIndex, const char** ppRobotName);}}}\\
+Query the name of a specific MiP robot which the discovery process has found.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* robotIndex: The index of the robot for which the name should be obtained.  It must be >= 0 and < the count returned by
+  mipGetDiscoveredRobotCount().
+* ppRobotName: A pointer to where the robot name should be placed.  Shouldn't be NULL.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The discovery process is only used with BLE transports to find nearby MiP robots.  If connecting directly to the MiP
+  via the UART transport then discovery isn't necessary.
+* The discovery process should be started by calling mipStartRobotDiscovery() before calling this function.
+* This function is used to index into the list of discovered robots to obtain its name.  This name can be later used as
+  the pRobotName parameter of the mipConnectToRobot() function.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int         result = -1;
+    size_t      robotCount = 0;
+    const char* pRobotName = NULL;
+    MiP*        pMiP = mipInit(NULL);
+
+    printf("\tExample - Discover MiP robots to which a connection can be made.\n"
+           "\tShould see first MiP robot be listed when it is powered up near\n"
+           "\tthe test machine.\n");
+    result = mipStartRobotDiscovery(pMiP);
+    do
+    {
+        result = mipGetDiscoveredRobotCount(pMiP, &robotCount);
+    } while (robotCount == 0);
+    result = mipGetDiscoveredRobotName(pMiP, 0, &pRobotName);
+    printf("\tDiscovered %s\n", pRobotName);
+    result = mipStopRobotDiscovery(pMiP);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipStopRobotDiscovery
+{{{int mipStopRobotDiscovery(MiP* pMiP);}}}\\
+Stops the process of discovering MiP robots to which a connection can be made.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The discovery process is only used with BLE transports to find nearby MiP robots.  If connecting directly to the MiP
+  via the UART transport then discovery isn't necessary.
+* The discovery process is started with a call to mipStartRobotDiscovery() and stops when this function is called.  
+* MiP robots which were found between these two calls can be listed through the use of the mipGetDiscoveredRobotCount()
+  and mipGetDiscoveredRobotName() functions.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int         result = -1;
+    size_t      robotCount = 0;
+    const char* pRobotName = NULL;
+    MiP*        pMiP = mipInit(NULL);
+
+    printf("\tExample - Discover MiP robots to which a connection can be made.\n"
+           "\tShould see first MiP robot be listed when it is powered up near\n"
+           "\tthe test machine.\n");
+    result = mipStartRobotDiscovery(pMiP);
+    do
+    {
+        result = mipGetDiscoveredRobotCount(pMiP, &robotCount);
+    } while (robotCount == 0);
+    result = mipGetDiscoveredRobotName(pMiP, 0, &pRobotName);
+    printf("\tDiscovered %s\n", pRobotName);
+    result = mipStopRobotDiscovery(pMiP);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipRawSend
+{{{int mipRawSend(MiP* pMiP, const uint8_t* pRequest, size_t requestLength);}}}\\
+Send a raw command to the MiP robot.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pRequest: Is a pointer to the array of the command bytes to be sent to the robot.
+* requestLength: Is the number of bytes in the pRequest buffer to be sent to the robot.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* There are typically higher level APIs that can be used to send commands to the MiP but in cases where the
+  functionality you need isn't already implemented in the MiP C API, you can use this function to send the raw command
+  bytes directly to the MiP.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    size_t  responseLength = 0;
+    uint8_t response[MIP_RESPONSE_MAX_LEN];
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipRaw*() functions.\n"
+           "\tShould set chest LED to purple and display MiP firmware revision\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    // Send 4-byte MiP command to set Chest LED to Purple.
+    static const uint8_t setChestPurple[] = "\x84\xFF\x01\xFF";
+    result = mipRawSend(pMiP, setChestPurple, sizeof(setChestPurple)-1);
+
+    // Request the MiP firmware revision information and display it.
+    static const uint8_t getMiPSoftwareVersion[] = "\x14";
+    result = mipRawReceive(pMiP, getMiPSoftwareVersion, sizeof(getMiPSoftwareVersion)-1,
+                                 response, sizeof(response), &responseLength);
+    if (result == MIP_ERROR_NONE && responseLength == 5 && response[0] == 0x14)
+    {
+        printf("\tMiP Software Version: %d-%d-%d (build #%d)\n",
+               response[1] + 2000,
+               response[2],
+               response[3],
+               response[4]);
+    }
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+=== mipRawReceive
+{{{int mipRawReceive(MiP* pMiP, const uint8_t* pRequest, size_t requestLength, uint8_t* pResponseBuffer, size_t responseBufferSize, size_t* pResponseLength);}}}\\
+Send a raw request to the MiP and receive its raw response.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pRequest: Is a pointer to the array of the command bytes to be sent to the robot.
+* requestLength: Is the number of bytes in the pRequest buffer to be sent to the robot.
+* pResponseBuffer: Is a pointer to the array of bytes into which the response should be copied.
+* responseBufferSize: Is the number of bytes in the pResponseBuffer.
+* pResponseLength: Is a pointer to where the actual number of bytes in the response should be placed.  This value may be
+  truncated to responseBufferSize if the actual response was > responseBufferSize.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* There are typically higher level APIs that can be used to send requests to the MiP but in cases where the
+  functionality you need isn't already implemented in the MiP C API, you can use this function to send the raw request
+  to the MiP and receive the raw resulting bytes.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    size_t  responseLength = 0;
+    uint8_t response[MIP_RESPONSE_MAX_LEN];
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipRaw*() functions.\n"
+           "\tShould set chest LED to purple and display MiP firmware revision\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    // Send 4-byte MiP command to set Chest LED to Purple.
+    static const uint8_t setChestPurple[] = "\x84\xFF\x01\xFF";
+    result = mipRawSend(pMiP, setChestPurple, sizeof(setChestPurple)-1);
+
+    // Request the MiP firmware revision information and display it.
+    static const uint8_t getMiPSoftwareVersion[] = "\x14";
+    result = mipRawReceive(pMiP, getMiPSoftwareVersion, sizeof(getMiPSoftwareVersion)-1,
+                                 response, sizeof(response), &responseLength);
+    if (result == MIP_ERROR_NONE && responseLength == 5 && response[0] == 0x14)
+    {
+        printf("\tMiP Software Version: %d-%d-%d (build #%d)\n",
+               response[1] + 2000,
+               response[2],
+               response[3],
+               response[4]);
+    }
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipRawReceiveNotification
+{{{int mipRawReceiveNotification(MiP* pMiP, uint8_t* pNotifyBuffer, size_t notifyBufferSize, size_t* pNotifyLength);}}}\\
+Get an out of band notification sent by the MiP robot.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pNotifyBuffer: Is a pointer to the array of bytes into which the notification should be copied.
+* notifyBufferSize: Is the number of bytes in the pNotifyBuffer.
+* pNotifyLength: Is a pointer to where the actual number of bytes in the notification should be placed.  This value may
+  be truncated to notifyBufferSize if the actual response was > notifyBufferSize.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* Sometimes the MiP robot sends notifications which aren't in direct response to the last request made.  This function
+  will return one of these responses/notifications.
+* There are typically higher level APIs that can be used to receive latest notifications from the MiP but in cases where
+  the functionality you need isn't already implemented in the MiP C API, you can use this function instead.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    size_t  responseLength = 0;
+    uint8_t response[MIP_RESPONSE_MAX_LEN];
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipRawReceiveNotification() functions.\n"
+           "\tIn less than half a minute, a notification should be displayed.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    // Wait for first out of band notification to arrive.
+    while (MIP_ERROR_EMPTY == mipRawReceiveNotification(pMiP, response, sizeof(response), &responseLength))
+    {
+    }
+
+    // Display notification contents.
+    printf("notification -> ");
+    for (int i = 0 ; i < responseLength ; i++)
+    {
+        printf("%02X", response[i]);
+    }
+    printf("\n");
+
+    mipUninit(pMiP);
+}
+}}}
