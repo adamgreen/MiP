@@ -40,7 +40,8 @@
 typedef struct MiP MiP;
 
 
-// UNDONE: Link to documentation.
+// The documentation for these functions can be found at the following link:
+//  https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#readme
 MiP* mipInit(const char* pInitOptions);
 void mipUninit(MiP* pMiP);
 
