@@ -52,32 +52,32 @@ void robotMain(void)
 
 
 ===API by Function
-|= Function         |= API                                                          |
-| Initialization    | [[#mipInit | mipInit]]                                        |
-|                   | [[#mipUninit | mipUninit]]                                    |
-| Connection        | [[#mipConnectToRobot | mipConnectToRobot]]                    |
-|                   | [[#mipDisconnectFromRobot | mipDisconnectFromRobot]]          |
-| Discovery         | [[#mipStartRobotDiscovery | mipStartRobotDiscovery]]          |
-|                   | [[#mipGetDiscoveredRobotCount | mipGetDiscoveredRobotCount]]  |
-|                   | [[#mipGetDiscoveredRobotName | mipGetDiscoveredRobotName]]    |
-|                   | [[#mipStopRobotDiscovery | mipStopRobotDiscovery]]            |
-| Raw               | [[#mipRawSend | mipRawSend]]                                  |
-|                   | [[#mipRawReceive | mipRawReceive]]                            |
-|                   | [[#mipRawReceiveNotification | mipRawReceiveNotification]]    |
+|= Function         |= API                                                                                                                          |
+| Initialization    | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                          |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipuninit | mipUninit]]                                      |
+| Connection        | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipconnecttorobot | mipConnectToRobot]]                      |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdisconnectfromrobot | mipDisconnectFromRobot]]            |
+| Discovery         | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]            |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]    |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]      |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]              |
+| Raw               | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                    |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                              |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]      |
 
 
 ===API by Name
-| [[#mipConnectToRobot | mipConnectToRobot]]                    |
-| [[#mipDisconnectFromRobot | mipDisconnectFromRobot]]          |
-| [[#mipGetDiscoveredRobotCount | mipGetDiscoveredRobotCount]]  |
-| [[#mipGetDiscoveredRobotName | mipGetDiscoveredRobotName]]    |
-| [[#mipInit | mipInit]]                                        |
-| [[#mipRawReceive | mipRawReceive]]                            |
-| [[#mipRawReceiveNotification | mipRawReceiveNotification]]    |
-| [[#mipRawSend | mipRawSend]]                                  |
-| [[#mipStartRobotDiscovery | mipStartRobotDiscovery]]          |
-| [[#mipStopRobotDiscovery | mipStopRobotDiscovery]]            |
-| [[#mipUninit | mipUninit]]                                    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipconnecttorobot | mipConnectToRobot]]                    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdisconnectfromrobot | mipDisconnectFromRobot]]          |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                        |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                            |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]          |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]            |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipuninit | mipUninit]]                                    |
 
 
 ===mipInit
