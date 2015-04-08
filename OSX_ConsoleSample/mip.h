@@ -30,10 +30,31 @@
 #define MIP_ERROR_NO_REQUEST    5 // Not waiting for a response from a request.
 #define MIP_ERROR_TIMEOUT       6 // Timed out waiting for response.
 #define MIP_ERROR_EMPTY         7 // The queue was empty.
+#define MIP_ERROR_BAD_RESPONSE  8 // Unexpected response from MiP.
 
 // Maximum length of MiP request and response buffer lengths.
 #define MIP_REQUEST_MAX_LEN     (17 + 1)    // Longest request is MPI_CMD_PLAY_SOUND.
 #define MIP_RESPONSE_MAX_LEN    (5 + 1)     // Longest response is MPI_CMD_REQUEST_CHEST_LED.
+
+typedef enum MiPGestureRadarMode
+{
+    MIP_GESTURE_RADAR_DISABLED = 0x00,
+    MIP_GESTURE                = 0x02,
+    MIP_RADAR                  = 0x04
+} MiPGestureRadarMode;
+
+typedef enum MiPRadar
+{
+    MIP_RADAR_NONE      = 0x01,
+    MIP_RADAR_10CM_30CM = 0x02,
+    MIP_RADAR_0CM_10CM  = 0x03
+} MiPRadar;
+
+typedef struct MiPRadarNotification
+{
+    uint32_t millisec;
+    MiPRadar radar;
+} MiPRadarNotification;
 
 
 // Abstraction of the pointer type returned by mipInit() and subsequently passed into all other mip*() functions.
@@ -52,6 +73,16 @@ int mipStartRobotDiscovery(MiP* pMiP);
 int mipGetDiscoveredRobotCount(MiP* pMiP, size_t* pCount);
 int mipGetDiscoveredRobotName(MiP* pMiP, size_t robotIndex, const char** ppRobotName);
 int mipStopRobotDiscovery(MiP* pMiP);
+
+int mipSetGestureRadarMode(MiP* pMiP, MiPGestureRadarMode mode);
+int mipGetGestureRadarMode(MiP* pMiP, MiPGestureRadarMode* pMode);
+int mipSetChestLED(MiP* pMiP, uint8_t red, uint8_t green, uint8_t blue);
+int mipContinuousDrive(MiP* pMiP, int8_t velocity, int8_t turnRate);
+int mipTurnLeft(MiP* pMiP, uint16_t degrees, uint8_t speed);
+int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed);
+int mipStop(MiP* pMiP);
+
+int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
 
 int mipRawSend(MiP* pMiP, const uint8_t* pRequest, size_t requestLength);
 int mipRawReceive(MiP* pMiP, const uint8_t* pRequest, size_t requestLength,

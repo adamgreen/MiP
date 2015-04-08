@@ -13,10 +13,7 @@
    limitations under the License.
 */
 /* Wall following sample that utilizes the mip* API. */
-#include <assert.h>
 #include <stdio.h>
-#include <string.h>
-#include <sys/time.h>
 #include <unistd.h>
 #include "mip.h"
 #include "osxble.h"
@@ -35,18 +32,9 @@ typedef enum States
     DONE,               // UNDONE: Done for now.
 } States;
 
-// Notifications of interest.
-typedef struct Notifications
-{
-    uint8_t radar;
-    uint8_t claps;
-} Notifications;
-
 
 // Forward function declarations.
-static Notifications latestNotifications(MiP* pMiP);
-static void updateChestColourBasedOnRadarRange(MiP* pMiP, uint8_t radarResult);
-static void displayNotifications(MiP* pMiP);
+static void updateChestColourBasedOnRadarRange(MiP* pMiP, const MiPRadarNotification* pRadar);
 
 
 int main(int argc, char *argv[])
@@ -60,12 +48,10 @@ int main(int argc, char *argv[])
 
 void robotMain(void)
 {
-    States          state = WAITING_FOR_WALL;
-    size_t          responseLength = 0;
-    uint32_t        cyclesToWait = 0;
-    struct timeval  startTime;
-    struct timeval  currentTime;
-    uint8_t         response[MIP_RESPONSE_MAX_LEN];
+    States               state = WAITING_FOR_WALL;
+    MiPGestureRadarMode  mode = MIP_GESTURE_RADAR_DISABLED;
+    MiPRadarNotification radar = {0, MIP_RADAR_NONE};
+    uint32_t             cyclesToWait = 0;
 
     // Connect to the first MiP robot discovered.
     MiP* pMiP = mipInit(NULL);
@@ -74,41 +60,37 @@ void robotMain(void)
     printf("Enable radar mode\n");
     do
     {
-        static const uint8_t enableRadar[] = "\x0C\x04";
-        static const uint8_t getRadarModeState[] = "\x0D";
-
         // Keep trying until it goes through.
-        mipRawSend(pMiP, enableRadar, sizeof(enableRadar)-1);
-        mipRawReceive(pMiP, getRadarModeState, sizeof(getRadarModeState)-1, response, sizeof(response), &responseLength);
-    } while (responseLength != 2 || response[1] != 0x04);
+        mipSetGestureRadarMode(pMiP, MIP_RADAR);
+        mipGetGestureRadarMode(pMiP, &mode);
+    } while (mode != MIP_RADAR);
     printf("Radar mode enabled\n");
 
-    Notifications notifications;
+    // Run state machine.
     do
     {
-        gettimeofday(&currentTime, NULL);
-        notifications = latestNotifications(pMiP);
-        updateChestColourBasedOnRadarRange(pMiP, notifications.radar);
+        mipGetLatestRadarNotification(pMiP, &radar);
+        updateChestColourBasedOnRadarRange(pMiP, &radar);
 
         switch (state)
         {
         case WAITING_FOR_WALL:
-            if (notifications.radar == 0x03)
+            if (radar.radar == MIP_RADAR_0CM_10CM)
             {
                 // Detected wall <10cm away so start timer and switch state.
                 printf("Wall detected\n");
                 state = WALL_DETECTED;
-                startTime = currentTime;
+                cyclesToWait = 100;
             }
             break;
         case WALL_DETECTED:
-            if (notifications.radar != 0x03)
+            if (radar.radar != MIP_RADAR_0CM_10CM)
             {
                 // Needs to stay in front of wall for at least 5 seconds.
                 printf("Wall no longer detected\n");
                 state = WAITING_FOR_WALL;
             }
-            else if (currentTime.tv_sec - startTime.tv_sec >= 5)
+            else if (--cyclesToWait == 0)
             {
                 // Has been in front of wall for 5 seconds to switch state to backup to ~30 cm.
                 printf("Backing up\n");
@@ -116,11 +98,10 @@ void robotMain(void)
             }
             break;
         case BACKING_UP:
-            if (notifications.radar != 0x01)
+            if (radar.radar != MIP_RADAR_NONE)
             {
                 // Back up until radar can't see wall anymore.
-                static const uint8_t driveBackwards[] = "\x78\x30\x00";
-                mipRawSend(pMiP, driveBackwards, sizeof(driveBackwards)-1);
+                mipContinuousDrive(pMiP, -10, 0);
             }
             else
             {
@@ -136,8 +117,7 @@ void robotMain(void)
                 // Waiting a bit for continuous drive commands to time out.
                 // Now issue turn left command.
                 printf("Turning left\n");
-                static const uint8_t turnLeft[] = "\x73\x18\x10";
-                mipRawSend(pMiP, turnLeft, sizeof(turnLeft)-1);
+                mipTurnLeft(pMiP, 120, 16);
                 cyclesToWait = 10;
                 state = TURNING_LEFT;
             }
@@ -152,18 +132,16 @@ void robotMain(void)
             }
             break;
         case TOWARD_WALL:
-            if (notifications.radar == 0x01)
+            if (radar.radar == MIP_RADAR_NONE)
             {
                 // Drive forward with a bit of a turn to the right until wall/obstacle is detected.
-                static const uint8_t driveForwardRight[] = "\x78\x08\x41";
-                mipRawSend(pMiP, driveForwardRight, sizeof(driveForwardRight)-1);
+                mipContinuousDrive(pMiP, 8, 2);
             }
             else
             {
                 // Once wall/obstacle is detected, we should start turning away from wall.
                 printf("Driving away from wall\n");
-                static const uint8_t stop[] = "\x77";
-                mipRawSend(pMiP, stop, sizeof(stop)-1);
+                mipStop(pMiP);
                 cyclesToWait = 20;
                 state = TURN_AWAY;
             }
@@ -172,11 +150,11 @@ void robotMain(void)
             // Decrement loop cycle count until it hits zero.
             if (cyclesToWait > 0)
                 cyclesToWait--;
-            if (cyclesToWait > 0 || notifications.radar != 0x01)
+            if (cyclesToWait > 0 || radar.radar != MIP_RADAR_NONE)
             {
-                // Keep turning away from wall for a minimum amount of time and until wall/obstacle is no longer in view.
-                static const uint8_t turnLeft[] = "\x78\x00\x62";
-                mipRawSend(pMiP, turnLeft, sizeof(turnLeft)-1);
+                // Keep turning left, away from wall for a minimum amount of time and until wall/obstacle
+                // is no longer in view.
+                mipContinuousDrive(pMiP, 0, -2);
             }
             else
             {
@@ -192,90 +170,41 @@ void robotMain(void)
         usleep(50000);
     } while (state != DONE);
 
-    // Get volume setting just to send a command that will wait for a response before quiting.
-    static const uint8_t getVolumeLevel[] = "\x16";
-    mipRawReceive(pMiP, getVolumeLevel, sizeof(getVolumeLevel)-1, response, sizeof(response), &responseLength);
-    printf("Volume level = %u\n", response[1]);
-
-    // Dump out of band notifications sent from MiP during this session.
-    displayNotifications(pMiP);
-
     mipUninit(pMiP);
 }
 
-static Notifications latestNotifications(MiP* pMiP)
-{
-    static Notifications latestNotifications;
-    size_t               responseLength = 0;
-    uint8_t              response[MIP_RESPONSE_MAX_LEN];
-
-    while (MIP_ERROR_NONE == mipRawReceiveNotification(pMiP, response, sizeof(response), &responseLength))
-    {
-        // Must have at least one byte to indicate which response is being given.
-        if (responseLength < 1)
-            continue;
-        switch (response[0])
-        {
-        case 0x0C:
-            if (responseLength == 2)
-                latestNotifications.radar = response[1];
-            break;
-        case 0x1D:
-            if (responseLength == 2)
-                latestNotifications.claps = response[1];
-            break;
-        default:
-            break;
-        }
-
-        printf("notification -> ");
-        for (int i = 0 ; i < responseLength ; i++)
-        {
-            printf("%02X", response[i]);
-        }
-        printf("\n");
-    }
-
-    return latestNotifications;
-}
-
-static void updateChestColourBasedOnRadarRange(MiP* pMiP, uint8_t radarResult)
+static void updateChestColourBasedOnRadarRange(MiP* pMiP, const MiPRadarNotification* pRadar)
 {
     static uint8_t lastRadarResult = 0x00;
-    uint8_t        chestColourCommand[] = { 0x84, 0x00, 0x00, 0x00 };
+    uint8_t        red = 0x01;
+    uint8_t        green = 0x01;
+    uint8_t        blue = 0x01;
 
     // Skip LED setting if the colour would be the same as last time.
-    if (radarResult == lastRadarResult)
+    if (pRadar->radar == lastRadarResult)
         return;
-    lastRadarResult = radarResult;
+    lastRadarResult = pRadar->radar;
 
-    printf("radar = %u\n", radarResult);
-    switch (radarResult)
+    switch (pRadar->radar)
     {
     case 0x01:
         // No object is detected.
         // Set colour to green.
-        chestColourCommand[2] = 0xFF;
+        green  = 0xFF;
         break;
     case 0x02:
         // Object is detected 10cm - 30cm out.
         // Set colour to amber.
-        chestColourCommand[1] = 0xFF;
-        chestColourCommand[2] = 0x40;
+        red = 0xFF;
+        green = 0x40;
         break;
     case 0x03:
         // Object is detected < 10cm.
         // Set colour to red.
-        chestColourCommand[1] = 0xFF;
+        red = 0xFF;
         break;
     default:
         break;
     }
-    mipRawSend(pMiP, chestColourCommand, sizeof(chestColourCommand)-1);
-}
-
-static void displayNotifications(MiP* pMiP)
-{
-    // The current latestRadarNotification() function prints all notifications that it encounters.
-    latestNotifications(pMiP);
+    mipSetChestLED(pMiP, red, green, blue);
 }

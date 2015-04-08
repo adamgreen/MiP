@@ -49,35 +49,52 @@ void robotMain(void)
 | MIP_ERROR_NO_REQUEST      | 5         | Not waiting for a response from a request |
 | MIP_ERROR_TIMEOUT         | 6         | Timed out waiting for response            |
 | MIP_ERROR_EMPTY           | 7         | The queue was empty                       |
+| MIP_ERROR_BAD_RESPONSE    | 8         | Unexpected response from MiP              |
 
 
 ===API by Function
-|= Function         |= API                                                                                                                          |
-| Initialization    | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                          |
-|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipuninit | mipUninit]]                                      |
-| Connection        | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipconnecttorobot | mipConnectToRobot]]                      |
-|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdisconnectfromrobot | mipDisconnectFromRobot]]            |
-| Discovery         | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]            |
-|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]    |
-|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]      |
-|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]              |
-| Raw               | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                    |
-|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                              |
-|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]      |
+|= Function         |= API                                                                                                                              |
+| Initialization    | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                              |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipuninit | mipUninit]]                                          |
+| Connection        | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipconnecttorobot | mipConnectToRobot]]                          |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdisconnectfromrobot | mipDisconnectFromRobot]]                |
+| Discovery         | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]                |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]        |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]          |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]                  |
+| Modes             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetgestureradarmode | mipGetGestureRadarMode]]                |
+| LEDs              | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetchestled | mipSetChestLED]]                                |
+| Motion            | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipcontinuousdrive | mipContinuousDrive]]                        |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnleft | mipTurnLeft]]                                      |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnright | mipTurnRight]]                                    |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
+| Notifications     | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
+| Raw               | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                        |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                  |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]          |
 
 
 ===API by Name
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipconnecttorobot | mipConnectToRobot]]                    |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdisconnectfromrobot | mipDisconnectFromRobot]]          |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]  |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]    |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                        |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                            |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]    |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                  |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]          |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]            |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipuninit | mipUninit]]                                    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipconnecttorobot | mipConnectToRobot]]                          |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipcontinuousdrive | mipContinuousDrive]]                        |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdisconnectfromrobot | mipDisconnectFromRobot]]                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]        |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]          |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetgestureradarmode | mipGetGestureRadarMode]]                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                              |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]          |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                        |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetchestled | mipSetChestLED]]                                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]                  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnleft | mipTurnLeft]]                                      |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnright | mipTurnRight]]                                    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipuninit | mipUninit]]                                          |
 
 
 ===mipInit
@@ -371,6 +388,357 @@ void robotMain(void)
 }}}
 
 
+===mipSetGestureRadarMode
+{{{int mipSetGestureRadarMode(MiP* pMiP, MiPGestureRadarMode mode);}}}\\
+Used to enable gesture or radar mode.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* mode: Which mode should be enabled: **MIP_GESTURE_RADAR_DISABLED** (disables both gesture and radar
+  modes), **MIP_GESTURE** (enables gesture mode), or **MIP_RADAR** (enables radar mode).
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* When the mode is set to **MIP_GESTURE**, the MiP switches out of its App Game Mode to its Gesture Game Mode.  This
+  mode doesn't respond as expected to most commands.
+* When the mode is set to **MIP_RADAR**, the MiP does still respond to app commands.  The MiP will start sending radar
+  notifications in this mode.  These notifications can be queried via mipGetLatestRadarNotification(). These
+  notifications will be suppressed while the MiP is executing long running commands.  Shorter commands like
+  mipContinuousDrive() do allow the MiP to send the radar notifications in a timely fashion.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                  result = -1;
+    MiPGestureRadarMode  mode = MIP_GESTURE_RADAR_DISABLED;
+    MiP*                 pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipSet/GetGestureRadarMode() functions.\n"
+           "\tShould switch into radar mode.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    printf("Enable radar mode\n");
+    do
+    {
+        // Keep trying until it goes through.
+        result = mipSetGestureRadarMode(pMiP, MIP_RADAR);
+        result = mipGetGestureRadarMode(pMiP, &mode);
+    } while (mode != MIP_RADAR);
+    printf("Radar mode enabled\n");
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetGestureRadarMode
+{{{int mipGetGestureRadarMode(MiP* pMiP, MiPGestureRadarMode* pMode);}}}\\
+Requests the current gesture or radar mode setting from the MiP.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pMode: A pointer into which the current MiP gesture/radar mode should be placed.  The returned mode setting will be
+  one of: **MIP_GESTURE_RADAR_DISABLED** (both gesture and radar modes are disabled), **MIP_GESTURE** (gesture mode is
+  enabled), or **MIP_RADAR** (radar mode is enabled).
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if MiP doesn't return a valid mode.
+* MIP_ERROR_TIMEOUT if MiP doesn't respond to request after multiple retries.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                  result = -1;
+    MiPGestureRadarMode  mode = MIP_GESTURE_RADAR_DISABLED;
+    MiP*                 pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipSet/GetGestureRadarMode() functions.\n"
+           "\tShould switch into radar mode.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    printf("Enable radar mode\n");
+    do
+    {
+        // Keep trying until it goes through.
+        result = mipSetGestureRadarMode(pMiP, MIP_RADAR);
+        result = mipGetGestureRadarMode(pMiP, &mode);
+    } while (mode != MIP_RADAR);
+    printf("Radar mode enabled\n");
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipSetChestLED
+{{{int mipSetChestLED(MiP* pMiP, uint8_t red, uint8_t green, uint8_t blue);}}}\\
+Sets the colour of the RGB LED in the MiP's chest.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* red: The intensity of the red colour channel (0 - 255).
+* green: The intensity of the green colour channel (0 - 255).
+* blue: The intensity of the blue colour channel (0 - 255).
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int           result = -1;
+    MiP*          pMiP = mipInit(NULL);
+    const uint8_t red = 0xff;
+    const uint8_t green = 0x00;
+    const uint8_t blue = 0xff;
+
+    printf("\tExample - Use setChestLED function.\n"
+           "\tShould switch chest LED to magenta.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipSetChestLED(pMiP, red, green, blue);
+
+    sleep(3);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipContinuousDrive
+{{{int mipContinuousDrive(MiP* pMiP, int8_t velocity, int8_t turnRate);}}}\\
+Instruct the MiP to drive in a particular direction.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* velocity: The forward/reverse velocity.  This parameter can have a value between -32 and 32, where -32 is maximum
+  reverse velocity and 32 is maximum forward velocity.  A velocity of 0 indicates that no forward/reverse motion is
+  desired at this time.
+* turnRate: The amount of left/right turn rate.  This parameter can have a value between -32 and 32, where -32 is
+  maximum left turn rate and 32 is maximum right turn velocity.  A turn rate of 0 indicates that no left/right turning
+  is desired at this time.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* This command must be sent at regular intervals to keep the MiP robot moving in the desired direction.  This interval
+  should be ~50 milliseconds.
+* When sent at longer intervals the MiP's motion will become more jerky as it thinks that there will not be another
+  motion command coming so it starts to stop all motion and then starts moving again once the next command does finally
+  arrive.
+* If your robot code is constantly sensing it's environment and using those ongoing sensor readings to make decisions on
+  which direction the robot should be currently headed, then this command will be the most useful for updating the MiP's
+  motion vector in real time.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int   result = -1;
+    int   i = 0;
+    MiP*  pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipContinuousDrive() function.\n"
+           "\tDrive forward with right turn and then backward with left turn.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    for (i = 0 ; i < 40 ; i++)
+    {
+        // Drive forward at half-speed and turn right at quarter rate.
+        result = mipContinuousDrive(pMiP, 16, 8);
+        // Pace out the continuous drive commands by 50 msec.
+        usleep(50000);
+    }
+    for (i = 0 ; i < 40 ; i++)
+    {
+        // Drive backward at half-speed and turn left at quarter rate.
+        result = mipContinuousDrive(pMiP, -16, -8);
+        // Pace out the continuous drive commands by 50 msec.
+        usleep(50000);
+    }
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipTurnLeft
+{{{int mipTurnLeft(MiP* pMiP, uint16_t degrees, uint8_t speed);}}}\\
+Commands the MiP robot to turn left the desired number of degrees at the desired speed.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* degrees: The number of degrees the robot should turn.  This parameter can have a value between 0 and 1275 degrees.
+* speed: The speed at which the turn should take place.  The speed can have a value between 0 and 24 with 0 being the
+  slowest rate and 24 the fastest.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int   result = -1;
+    MiP*  pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipTurnLeft & mipTurnRight() functions.\n"
+           "\tTurn 180 degrees to left and then 180 degrees to right.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipTurnLeft(pMiP, 180, 12);
+    sleep(2);
+    result = mipTurnRight(pMiP, 180, 12);
+    sleep(2);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipTurnRight
+{{{int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed);}}}\\
+Commands the MiP robot to turn right the desired number of degrees at the desired speed.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* degrees: The number of degrees the robot should turn.  This parameter can have a value between 0 and 1275 degrees.
+* speed: The speed at which the turn should take place.  The speed can have a value between 0 and 24 with 0 being the
+  slowest rate and 24 the fastest.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int   result = -1;
+    MiP*  pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipTurnLeft & mipTurnRight() functions.\n"
+           "\tTurn 180 degrees to left and then 180 degrees to right.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipTurnLeft(pMiP, 180, 12);
+    sleep(2);
+    result = mipTurnRight(pMiP, 180, 12);
+    sleep(2);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipStop
+{{{int mipStop(MiP* pMiP);}}}\\
+Interrupt and stop current robot motion.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int   result = -1;
+    MiP*  pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipStop() function.\n"
+           "\tInterrupt a 360 degree turn with mipStop().\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipTurnLeft(pMiP, 360, 6);
+    sleep(1);
+    result = mipStop(pMiP);
+    sleep(1);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetLatestRadarNotification
+{{{int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);}}}\\
+Retrieves the most recent radar notification from the MiP.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pNotification: A pointer to the MiPRadarNotification structure to be filled in with the contents of the most recent
+  radar notification from the MiP.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_EMPTY if the MiP hasn't sent a radar notification since the connection was made.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected value in the radar notification.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* Must enable radar mode via the mipSetGestureRadarMode() function before the MiP will start sending notification of
+  this type.
+* The **millisec** field in the returned MiPRadarNotification structure can be checked by the caller to see if this
+  notification is the same as the last one retrieved since newer notifications will contain a different value in this
+  field.
+* The **radar** field in the returned MiPRadarNotification structure will contain one of these
+  values: **MIP_RADAR_NONE** (the MiP detects nothing in front of it), **MIP_RADAR_10CM_30CM** (the MiP detects
+  something between 10cm and 30cm), and **MIP_RADAR_0CM_10CM** (the MiP detects something closer than 10cm).
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                  result = -1;
+    MiPRadarNotification radar = {0, MIP_RADAR_NONE};
+    MiP*                 pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipGetLatestRadarNotification() function.\n"
+           "\tProgram should end once you place your handle <10cm from MiP's face.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipSetGestureRadarMode(pMiP, MIP_RADAR);
+    do
+    {
+        result = mipGetLatestRadarNotification(pMiP, &radar);
+    } while (radar.radar != MIP_RADAR_0CM_10CM);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
 ===mipRawSend
 {{{int mipRawSend(MiP* pMiP, const uint8_t* pRequest, size_t requestLength);}}}\\
 Send a raw command to the MiP robot.
@@ -441,6 +809,7 @@ Send a raw request to the MiP and receive its raw response.
 
 **Returns:**
 * MIP_ERROR_NONE on success.
+* MIP_ERROR_TIMEOUT if MiP doesn't respond to request after multiple retries.
 * Non-zero MIP_ERROR_* code otherwise.
 
 **Notes:**
