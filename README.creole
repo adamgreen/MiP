@@ -18,6 +18,26 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==April 7, 2015
+I have made some real progress on my
+[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#readme | MiP C API]] over the last couple of days.  I
+added enough high level functions so that I could refactor my
+[[https://github.com/adamgreen/MiP/blob/ac6074fc698d789359bd7a9666e0e57a02471e20/OSX_ConsoleSample/main.c | wall following example]]
+to no longer need to build up command buffers manually and call the mipRaw*() functions.  The added functions include:
+* mipSetGestureRadarMode()
+* mipGetGestureRadarMode()
+* mipSetChestLED()
+* mipContinuousDrive()
+* mipTurnLeft()
+* mipTurnRight()
+* mipStop()
+* mipGetLatestRadarNotification()
+
+My next priority is to implement functions for all of the remaining LED and motion related commands supported by the
+[[https://github.com/WowWeeLabs/MiP-BLE-Protocol | WowWee MiP BLE Protocol]].
+
+
+
 ==April 5, 2015
 I started implementing and documenting the new high level MiP C API this weekend.\\
 [[https://github.com/adamgreen/MiP/blob/master/OSX_ConsoleSample/mip.h | MiP C API Header File]]\\
