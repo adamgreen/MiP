@@ -50,12 +50,36 @@ typedef enum MiPRadar
     MIP_RADAR_0CM_10CM  = 0x03
 } MiPRadar;
 
+typedef enum MiPHeadLED
+{
+    MIP_HEAD_LED_OFF        = 0,
+    MIP_HEAD_LED_ON         = 1,
+    MIP_HEAD_LED_BLINK_SLOW = 2,
+    MIP_HEAD_LED_BLINK_FAST = 3
+} MiPHeadLED;
+
 typedef struct MiPRadarNotification
 {
     uint32_t millisec;
     MiPRadar radar;
 } MiPRadarNotification;
 
+typedef struct MiPChestLED
+{
+    uint16_t onTime;
+    uint16_t offTime;
+    uint8_t  red;
+    uint8_t  green;
+    uint8_t  blue;
+} MiPChestLED;
+
+typedef struct MiPHeadLEDs
+{
+    MiPHeadLED led1;
+    MiPHeadLED led2;
+    MiPHeadLED led3;
+    MiPHeadLED led4;
+} MiPHeadLEDs;
 
 // Abstraction of the pointer type returned by mipInit() and subsequently passed into all other mip*() functions.
 typedef struct MiP MiP;
@@ -76,7 +100,13 @@ int mipStopRobotDiscovery(MiP* pMiP);
 
 int mipSetGestureRadarMode(MiP* pMiP, MiPGestureRadarMode mode);
 int mipGetGestureRadarMode(MiP* pMiP, MiPGestureRadarMode* pMode);
+
 int mipSetChestLED(MiP* pMiP, uint8_t red, uint8_t green, uint8_t blue);
+int mipFlashChestLED(MiP* pMiP, uint8_t red, uint8_t green, uint8_t blue, uint16_t onTime, uint16_t offTime);
+int mipGetChestLED(MiP* pMiP, MiPChestLED* pChestLED);
+int mipSetHeadLEDs(MiP* pMiP, MiPHeadLED led1, MiPHeadLED led2, MiPHeadLED led3, MiPHeadLED led4);
+int mipGetHeadLEDs(MiP* pMiP, MiPHeadLEDs* pHeadLEDs);
+
 int mipContinuousDrive(MiP* pMiP, int8_t velocity, int8_t turnRate);
 int mipTurnLeft(MiP* pMiP, uint16_t degrees, uint8_t speed);
 int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed);

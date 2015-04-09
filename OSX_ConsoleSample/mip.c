@@ -32,7 +32,11 @@
 #define MIP_CMD_TURN_RIGHT              0x74
 #define MIP_CMD_STOP                    0x77
 #define MIP_CMD_CONTINUOUS_DRIVE        0x78
+#define MIP_CMD_GET_CHEST_LED           0x83
 #define MIP_CMD_SET_CHEST_LED           0x84
+#define MIP_CMD_FLASH_CHEST_LED         0x89
+#define MIP_CMD_SET_HEAD_LEDS           0x8A
+#define MIP_CMD_GET_HEAD_LEDS           0x8B
 
 
 // MiP::flags bits
@@ -49,6 +53,7 @@ struct MiP
 
 
 // Forward Function Declarations.
+static int isValidHeadLED(MiPHeadLED led);
 static void readNotifications(MiP* pMiP);
 static uint32_t milliseconds(MiP* pMiP);
 
@@ -165,6 +170,101 @@ int mipSetChestLED(MiP* pMiP, uint8_t red, uint8_t green, uint8_t blue)
     command[2] = green;
     command[3] = blue;
     return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipFlashChestLED(MiP* pMiP, uint8_t red, uint8_t green, uint8_t blue, uint16_t onTime, uint16_t offTime)
+{
+    uint8_t command[1+5];
+
+    assert( pMiP );
+    // on/off time are in units of 20 msecs.
+    assert( onTime / 20 <= 255 && offTime / 20 <= 255 );
+
+    command[0] = MIP_CMD_FLASH_CHEST_LED;
+    command[1] = red;
+    command[2] = green;
+    command[3] = blue;
+    command[4] = onTime / 20;
+    command[5] = offTime / 20;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipGetChestLED(MiP* pMiP, MiPChestLED* pChestLED)
+{
+    static const uint8_t getChestLED[1] = { MIP_CMD_GET_CHEST_LED };
+    uint8_t              response[1+5];
+    size_t               responseLength;
+    int                  result;
+
+    assert( pMiP );
+    assert( pChestLED );
+
+    result = mipRawReceive(pMiP, getChestLED, sizeof(getChestLED), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    if (responseLength != sizeof(response) || response[0] != MIP_CMD_GET_CHEST_LED )
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    pChestLED->red = response[1];
+    pChestLED->green = response[2];
+    pChestLED->blue = response[3];
+    // on/off time are in units of 20 msecs.
+    pChestLED->onTime = (uint16_t)response[4] * 20;
+    pChestLED->offTime = (uint16_t)response[5] * 20;
+    return result;
+}
+
+int mipSetHeadLEDs(MiP* pMiP, MiPHeadLED led1, MiPHeadLED led2, MiPHeadLED led3, MiPHeadLED led4)
+{
+    uint8_t command[1+4];
+
+    assert( pMiP );
+
+    command[0] = MIP_CMD_SET_HEAD_LEDS;
+    command[1] = led1;
+    command[2] = led2;
+    command[3] = led3;
+    command[4] = led4;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipGetHeadLEDs(MiP* pMiP, MiPHeadLEDs* pHeadLEDs)
+{
+    static const uint8_t getHeadLEDs[1] = { MIP_CMD_GET_HEAD_LEDS };
+    uint8_t              response[1+4];
+    size_t               responseLength;
+    int                  result;
+
+    assert( pMiP );
+    assert( pHeadLEDs );
+
+    result = mipRawReceive(pMiP, getHeadLEDs, sizeof(getHeadLEDs), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    if (responseLength != sizeof(response) ||
+        response[0] != MIP_CMD_GET_HEAD_LEDS ||
+        !isValidHeadLED(response[1]) ||
+        !isValidHeadLED(response[2]) ||
+        !isValidHeadLED(response[3]) ||
+        !isValidHeadLED(response[4]))
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    pHeadLEDs->led1 = response[1];
+    pHeadLEDs->led2 = response[2];
+    pHeadLEDs->led3 = response[3];
+    pHeadLEDs->led4 = response[4];
+    return result;
+}
+
+static int isValidHeadLED(MiPHeadLED led)
+{
+    return led >= MIP_HEAD_LED_OFF && led <= MIP_HEAD_LED_BLINK_FAST;
 }
 
 int mipContinuousDrive(MiP* pMiP, int8_t velocity, int8_t turnRate)

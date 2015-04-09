@@ -65,6 +65,10 @@ void robotMain(void)
 | Modes             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetgestureradarmode | mipGetGestureRadarMode]]                |
 | LEDs              | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetchestled | mipSetChestLED]]                                |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipflashchestled | mipFlashChestLED]]                            |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetchestled | mipGetChestLED]]                                |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetheadleds | mipSetHeadLEDs]]                                |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetheadleds | mipGetHeadLEDs]]                                |
 | Motion            | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipcontinuousdrive | mipContinuousDrive]]                        |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnleft | mipTurnLeft]]                                      |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnright | mipTurnRight]]                                    |
@@ -79,9 +83,12 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipconnecttorobot | mipConnectToRobot]]                          |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipcontinuousdrive | mipContinuousDrive]]                        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdisconnectfromrobot | mipDisconnectFromRobot]]                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipflashchestled | mipFlashChestLED]]                            |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetchestled | mipGetChestLED]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]          |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetgestureradarmode | mipGetGestureRadarMode]]                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetheadleds | mipGetHeadLEDs]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                  |
@@ -89,6 +96,7 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetchestled | mipSetChestLED]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetheadleds | mipSetHeadLEDs]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]                  |
@@ -516,6 +524,254 @@ void robotMain(void)
     sleep(3);
 
     mipUninit(pMiP);
+}
+}}}
+
+
+===mipFlashChestLED
+{{{int mipFlashChestLED(MiP* pMiP, uint8_t red, uint8_t green, uint8_t blue, uint16_t onTime, uint16_t offTime);}}}\\
+Sets the colour and flashing period of the RGB LED in the MiP's chest.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* red: The intensity of the red colour channel (0 - 255).
+* green: The intensity of the green colour channel (0 - 255).
+* blue: The intensity of the blue colour channel (0 - 255).
+* onTime: Is the time in milliseconds that the LED should remain on with the specified colour.  This parameter can be
+  set to a value between 0 and 5100 milliseconds.
+* offTime: Is the time in milliseconds that the LED should remain off before turning on again with the specified colour.
+  This parameter can be set to a value between 0 and 5100 milliseconds.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The MiP only supports a granularity of 20 milliseconds for the onTime and offTime parameters.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int            result = -1;
+    const uint8_t  red = 0xff;
+    const uint8_t  green = 0x00;
+    const uint8_t  blue = 0x00;
+    const uint16_t onTime = 1000;    // 1000 msecs / sec
+    const uint16_t offTime = 1000;   // 1000 msecs / sec
+    MiPChestLED    chestLED;
+    MiP*           pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipFlashChestLED() and mipGetChestLED() functions.\n"
+           "\tShould flash chest LED red.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipFlashChestLED(pMiP, red, green, blue, onTime, offTime);
+
+    sleep(4);
+
+    result = mipGetChestLED(pMiP, &chestLED);
+    printf("chestLED\n");
+    printf("red: %u\n", chestLED.red);
+    printf("green: %u\n", chestLED.green);
+    printf("blue: %u\n", chestLED.blue);
+    printf("on time: %u milliseconds\n", chestLED.onTime);
+    printf("off time: %u milliseconds\n", chestLED.offTime);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetChestLED
+{{{int mipGetChestLED(MiP* pMiP, MiPChestLED* pChestLED);}}}\\
+Requests the current setting for the colour and flashing period of the RGB LED in the MiP's chest.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pChestLED: Points to the MiPChestLED structure to be filled in by this call.  This structure
+  contains **red**, **green**, and **blue** fields indicating the intensity (0 - 255) of each colour channel when the
+  chest LED is on.  The structure also contains **onTime** and **offTime** fields indicating the time in milliseconds
+  the LED should be turned on and off for the flashing pattern.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if MiP doesn't return a valid mode.
+* MIP_ERROR_TIMEOUT if MiP doesn't respond to request after multiple retries.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The MiP only supports a granularity of 20 milliseconds for the onTime and offTime fields in the MiPChestLED structure.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int            result = -1;
+    const uint8_t  red = 0xff;
+    const uint8_t  green = 0x00;
+    const uint8_t  blue = 0x00;
+    const uint16_t onTime = 1000;    // 1000 msecs / sec
+    const uint16_t offTime = 1000;   // 1000 msecs / sec
+    MiPChestLED    chestLED;
+    MiP*           pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipFlashChestLED() and mipGetChestLED() functions.\n"
+           "\tShould flash chest LED red.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipFlashChestLED(pMiP, red, green, blue, onTime, offTime);
+
+    sleep(4);
+
+    result = mipGetChestLED(pMiP, &chestLED);
+    printf("chestLED\n");
+    printf("red: %u\n", chestLED.red);
+    printf("green: %u\n", chestLED.green);
+    printf("blue: %u\n", chestLED.blue);
+    printf("on time: %u milliseconds\n", chestLED.onTime);
+    printf("off time: %u milliseconds\n", chestLED.offTime);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipSetHeadLEDs
+{{{int mipSetHeadLEDs(MiP* pMiP, MiPHeadLED led1, MiPHeadLED led2, MiPHeadLED led3, MiPHeadLED led4);}}}\\
+Sets the state of the four LEDs on the MiP's head.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* led1: The state of led1 on the MiP's head.  Valid states
+  are **MIP_HEAD_LED_OFF**, **MIP_HEAD_LED_ON**, **MIP_HEAD_LED_BLINK_SLOW**, **MIP_HEAD_LED_BLINK_FAST**.
+* led2: The state of led2 on the MiP's head.  Valid states
+  are **MIP_HEAD_LED_OFF**, **MIP_HEAD_LED_ON**, **MIP_HEAD_LED_BLINK_SLOW**, **MIP_HEAD_LED_BLINK_FAST**.
+* led3: The state of led3 on the MiP's head.  Valid states
+  are **MIP_HEAD_LED_OFF**, **MIP_HEAD_LED_ON**, **MIP_HEAD_LED_BLINK_SLOW**, **MIP_HEAD_LED_BLINK_FAST**.
+* led4: The state of led4 on the MiP's head.  Valid states
+  are **MIP_HEAD_LED_OFF**, **MIP_HEAD_LED_ON**, **MIP_HEAD_LED_BLINK_SLOW**, **MIP_HEAD_LED_BLINK_FAST**.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The 4 head LEDs are numbered from left to right, with led1 being the leftmost and led4 being the rightmost.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int         result = -1;
+    MiPHeadLEDs headLEDs;
+    MiP*        pMiP = mipInit(NULL);
+
+    printf("\tExample - Use head LED functions.\n"
+           "\tShould set each head LED to different state.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipSetHeadLEDs(pMiP, MIP_HEAD_LED_OFF, MIP_HEAD_LED_ON, MIP_HEAD_LED_BLINK_SLOW, MIP_HEAD_LED_BLINK_FAST);
+
+    sleep(4);
+
+    result = mipGetHeadLEDs(pMiP, &headLEDs);
+    printf("Head LEDs\n");
+    printf("led1: %s\n", headLEDString(headLEDs.led1));
+    printf("led2: %s\n", headLEDString(headLEDs.led2));
+    printf("led3: %s\n", headLEDString(headLEDs.led3));
+    printf("led4: %s\n", headLEDString(headLEDs.led4));
+
+    mipUninit(pMiP);
+}
+
+static const char* headLEDString(MiPHeadLED led)
+{
+    switch (led)
+    {
+    case MIP_HEAD_LED_OFF:
+        return "Off";
+    case MIP_HEAD_LED_ON:
+        return "On";
+    case MIP_HEAD_LED_BLINK_SLOW:
+        return "Blink Slow";
+    case MIP_HEAD_LED_BLINK_FAST:
+        return "Blink Fast";
+    default:
+        return "";
+    }
+}
+}}}
+
+
+===mipGetHeadLEDs
+{{{int mipGetHeadLEDs(MiP* pMiP, MiPHeadLEDs* pHeadLEDs);}}}\\
+Requests the current setting for the MiP's four head LEDs.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pHeadLEDs: Points to the MiPHeadLEDs structure to be filled in by this call.  This structure
+  contains **led1**, **led2**, **led3**, and **led4** fields indicating the state of each head LED.  Supported states
+  are **MIP_HEAD_LED_OFF**, **MIP_HEAD_LED_ON**, **MIP_HEAD_LED_BLINK_SLOW**, **MIP_HEAD_LED_BLINK_FAST**.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if MiP doesn't return a valid state.
+* MIP_ERROR_TIMEOUT if MiP doesn't respond to request after multiple retries.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The 4 head LEDs are numbered from left to right, with led1 being the leftmost and led4 being the rightmost.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int         result = -1;
+    MiPHeadLEDs headLEDs;
+    MiP*        pMiP = mipInit(NULL);
+
+    printf("\tExample - Use head LED functions.\n"
+           "\tShould set each head LED to different state.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipSetHeadLEDs(pMiP, MIP_HEAD_LED_OFF, MIP_HEAD_LED_ON, MIP_HEAD_LED_BLINK_SLOW, MIP_HEAD_LED_BLINK_FAST);
+
+    sleep(4);
+
+    result = mipGetHeadLEDs(pMiP, &headLEDs);
+    printf("Head LEDs\n");
+    printf("led1: %s\n", headLEDString(headLEDs.led1));
+    printf("led2: %s\n", headLEDString(headLEDs.led2));
+    printf("led3: %s\n", headLEDString(headLEDs.led3));
+    printf("led4: %s\n", headLEDString(headLEDs.led4));
+
+    mipUninit(pMiP);
+}
+
+static const char* headLEDString(MiPHeadLED led)
+{
+    switch (led)
+    {
+    case MIP_HEAD_LED_OFF:
+        return "Off";
+    case MIP_HEAD_LED_ON:
+        return "On";
+    case MIP_HEAD_LED_BLINK_SLOW:
+        return "Blink Slow";
+    case MIP_HEAD_LED_BLINK_FAST:
+        return "Blink Fast";
+    default:
+        return "";
+    }
 }
 }}}
 
