@@ -21,6 +21,11 @@ OS X port of the [[https://github.com/WowWeeLabs/MiP-iOS-SDK#readme | Official W
 
 **OS X Example**\\
 {{{
+#include <stdio.h>
+#include "mip.h"
+#include "osxble.h"
+
+
 int main(int argc, char *argv[])
 {
     // Initialize the Core Bluetooth stack on this the main thread and start the worker robot thread to run the
@@ -29,10 +34,31 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
 void robotMain(void)
 {
-    // Your robot code goes here.
+    int                result = -1;
+    MiPSoftwareVersion softwareVersion;
+    MiPHardwareInfo    hardwareInfo;
+    MiP*               pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipGetSoftwareVersion() & mipGetHardwareInfo() functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipGetSoftwareVersion(pMiP, &softwareVersion);
+    result = mipGetHardwareInfo(pMiP, &hardwareInfo);
+
+    printf("software version: %u-%u-%u.%u\n",
+           softwareVersion.year,
+           softwareVersion.month,
+           softwareVersion.day,
+           softwareVersion.uniqueVersion);
+    printf("hardware info\n");
+    printf("  voice chip version: %u\n", hardwareInfo.voiceChip);
+    printf("    hardware version: %u\n", hardwareInfo.hardware);
+
+    mipUninit(pMiP);
 }
 }}}
 **TODO:** Add some simple example code to robotMain() once I have enough API together to use it.
@@ -74,6 +100,8 @@ void robotMain(void)
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnright | mipTurnRight]]                                    |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
 | Notifications     | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
+| Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                        |
 | Raw               | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                        |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                  |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]          |
@@ -88,8 +116,10 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]          |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetgestureradarmode | mipGetGestureRadarMode]]                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetheadleds | mipGetHeadLEDs]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]          |
@@ -989,6 +1019,105 @@ void robotMain(void)
     {
         result = mipGetLatestRadarNotification(pMiP, &radar);
     } while (radar.radar != MIP_RADAR_0CM_10CM);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetSoftwareVersion
+{{{int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);}}}\\
+Get the version information for the software in the MiP.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pSoftware: A pointer to the MiPSoftwareVersion structure to be filled in with the version information of the MiP
+  software.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected response.
+* MIP_ERROR_TIMEOUT if MiP doesn't respond to request after multiple retries.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The MiPSoftwareVersion structure has **year**, **month**, **day**, and **uniqueVersion** fields.
+  The **uniqueVersion** field is used to differentiate between software builds from the same day.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                result = -1;
+    MiPSoftwareVersion softwareVersion;
+    MiPHardwareInfo    hardwareInfo;
+    MiP*               pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipGetSoftwareVersion() & mipGetHardwareInfo() functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipGetSoftwareVersion(pMiP, &softwareVersion);
+    result = mipGetHardwareInfo(pMiP, &hardwareInfo);
+
+    printf("software version: %u-%u-%u.%u\n",
+           softwareVersion.year,
+           softwareVersion.month,
+           softwareVersion.day,
+           softwareVersion.uniqueVersion);
+    printf("hardware info\n");
+    printf("  voice chip version: %u\n", hardwareInfo.voiceChip);
+    printf("    hardware version: %u\n", hardwareInfo.hardware);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetHardwareInfo
+{{{int mipGetHardwareInfo(MiP* pMiP, MiPHardwareInfo* pHardware);}}}\\
+Get the version information for the hardware in the MiP.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pHardware: A pointer to the MiPHardwareInfo structure to be filled in with the version information of the MiP
+  hardware.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected response.
+* MIP_ERROR_TIMEOUT if MiP doesn't respond to request after multiple retries.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The MiPHardwareInfo structure has **voiceChip** and **hardware** fields.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                result = -1;
+    MiPSoftwareVersion softwareVersion;
+    MiPHardwareInfo    hardwareInfo;
+    MiP*               pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipGetSoftwareVersion() & mipGetHardwareInfo() functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipGetSoftwareVersion(pMiP, &softwareVersion);
+    result = mipGetHardwareInfo(pMiP, &hardwareInfo);
+
+    printf("software version: %u-%u-%u.%u\n",
+           softwareVersion.year,
+           softwareVersion.month,
+           softwareVersion.day,
+           softwareVersion.uniqueVersion);
+    printf("hardware info\n");
+    printf("  voice chip version: %u\n", hardwareInfo.voiceChip);
+    printf("    hardware version: %u\n", hardwareInfo.hardware);
 
     mipUninit(pMiP);
 }

@@ -81,6 +81,20 @@ typedef struct MiPHeadLEDs
     MiPHeadLED led4;
 } MiPHeadLEDs;
 
+typedef struct MiPSoftwareVersion
+{
+    uint16_t year;
+    uint8_t  month;
+    uint8_t  day;
+    uint8_t  uniqueVersion;
+} MiPSoftwareVersion;
+
+typedef struct MiPHardwareInfo
+{
+    uint8_t voiceChip;
+    uint8_t hardware;
+} MiPHardwareInfo;
+
 // Abstraction of the pointer type returned by mipInit() and subsequently passed into all other mip*() functions.
 typedef struct MiP MiP;
 
@@ -113,6 +127,9 @@ int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed);
 int mipStop(MiP* pMiP);
 
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
+
+int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);
+int mipGetHardwareInfo(MiP* pMiP, MiPHardwareInfo* pHardware);
 
 int mipRawSend(MiP* pMiP, const uint8_t* pRequest, size_t requestLength);
 int mipRawReceive(MiP* pMiP, const uint8_t* pRequest, size_t requestLength,

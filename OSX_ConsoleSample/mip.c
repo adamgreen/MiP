@@ -28,6 +28,7 @@
 #define MIP_CMD_GET_RADAR_RESPONSE      0x0C
 #define MIP_CMD_GET_GESTURE_RADAR_MODE  0x0D
 #define MIP_CMD_GET_SOFTWARE_VERSION    0x14
+#define MIP_CMD_GET_HARDWARE_INFO       0x19
 #define MIP_CMD_TURN_LEFT               0x73
 #define MIP_CMD_TURN_RIGHT              0x74
 #define MIP_CMD_STOP                    0x77
@@ -390,6 +391,54 @@ static uint32_t milliseconds(MiP* pMiP)
 
     return (uint32_t)((mach_absolute_time() * pMiP->machTimebaseInfo.numer) /
                       (nanoPerMilli * pMiP->machTimebaseInfo.denom));
+}
+
+int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware)
+{
+    static const uint8_t getSoftwareVersion[1] = { MIP_CMD_GET_SOFTWARE_VERSION };
+    uint8_t              response[1+4];
+    size_t               responseLength;
+    int                  result;
+
+    assert( pMiP );
+    assert( pSoftware );
+
+    result = mipRawReceive(pMiP, getSoftwareVersion, sizeof(getSoftwareVersion), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    if (responseLength != sizeof(response) || response[0] != MIP_CMD_GET_SOFTWARE_VERSION)
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    pSoftware->year = 2000 + response[1];
+    pSoftware->month = response[2];
+    pSoftware->day = response[3];
+    pSoftware->uniqueVersion = response[4];
+    return result;
+}
+
+int mipGetHardwareInfo(MiP* pMiP, MiPHardwareInfo* pHardware)
+{
+    static const uint8_t getHardwareInfo[1] = { MIP_CMD_GET_HARDWARE_INFO };
+    uint8_t              response[1+2];
+    size_t               responseLength;
+    int                  result;
+
+    assert( pMiP );
+    assert( pHardware );
+
+    result = mipRawReceive(pMiP, getHardwareInfo, sizeof(getHardwareInfo), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    if (responseLength != sizeof(response) || response[0] != MIP_CMD_GET_HARDWARE_INFO)
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    pHardware->voiceChip = response[1];
+    pHardware->hardware = response[2];
+    return result;
 }
 
 int mipRawSend(MiP* pMiP, const uint8_t* pRequest, size_t requestLength)
