@@ -29,6 +29,7 @@
 #define MIP_CMD_GET_GESTURE_RADAR_MODE  0x0D
 #define MIP_CMD_GET_SOFTWARE_VERSION    0x14
 #define MIP_CMD_GET_HARDWARE_INFO       0x19
+#define MIP_CMD_DISTANCE_DRIVE          0x70
 #define MIP_CMD_TURN_LEFT               0x73
 #define MIP_CMD_TURN_RIGHT              0x74
 #define MIP_CMD_STOP                    0x77
@@ -291,6 +292,24 @@ int mipContinuousDrive(MiP* pMiP, int8_t velocity, int8_t turnRate)
         command[2] = 0x60 + (-turnRate);
     else
         command[2] = 0x40 + turnRate;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipDistanceDrive(MiP* pMiP, MiPDriveDirection driveDirection, uint8_t cm,
+                                MiPTurnDirection turnDirection, uint16_t degrees)
+{
+    uint8_t command[1+5];
+
+    assert( pMiP );
+    assert( degrees <= 360 );
+
+    command[0] = MIP_CMD_DISTANCE_DRIVE;
+    command[1] = driveDirection;
+    command[2] = cm;
+    command[3] = turnDirection;
+    command[4] = degrees >> 8;
+    command[5] = degrees & 0xFF;
 
     return mipRawSend(pMiP, command, sizeof(command));
 }

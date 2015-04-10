@@ -58,6 +58,18 @@ typedef enum MiPHeadLED
     MIP_HEAD_LED_BLINK_FAST = 3
 } MiPHeadLED;
 
+typedef enum MiPDriveDirection
+{
+    MIP_DRIVE_FORWARD  = 0x00,
+    MIP_DRIVE_BACKWARD = 0x01
+} MiPDriveDirection;
+
+typedef enum MiPTurnDirection
+{
+    MIP_TURN_LEFT  = 0x00,
+    MIP_TURN_RIGHT = 0x01
+} MiPTurnDirection;
+
 typedef struct MiPRadarNotification
 {
     uint32_t millisec;
@@ -122,6 +134,8 @@ int mipSetHeadLEDs(MiP* pMiP, MiPHeadLED led1, MiPHeadLED led2, MiPHeadLED led3,
 int mipGetHeadLEDs(MiP* pMiP, MiPHeadLEDs* pHeadLEDs);
 
 int mipContinuousDrive(MiP* pMiP, int8_t velocity, int8_t turnRate);
+int mipDistanceDrive(MiP* pMiP, MiPDriveDirection driveDirection, uint8_t cm,
+                                MiPTurnDirection turnDirection, uint16_t degrees);
 int mipTurnLeft(MiP* pMiP, uint16_t degrees, uint8_t speed);
 int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed);
 int mipStop(MiP* pMiP);
