@@ -30,6 +30,8 @@
 #define MIP_CMD_GET_SOFTWARE_VERSION    0x14
 #define MIP_CMD_GET_HARDWARE_INFO       0x19
 #define MIP_CMD_DISTANCE_DRIVE          0x70
+#define MIP_CMD_DRIVE_FORWARD           0x71
+#define MIP_CMD_DRIVE_BACKWARD          0x72
 #define MIP_CMD_TURN_LEFT               0x73
 #define MIP_CMD_TURN_RIGHT              0x74
 #define MIP_CMD_STOP                    0x77
@@ -344,6 +346,38 @@ int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed)
     command[0] = MIP_CMD_TURN_RIGHT;
     command[1] = angle;
     command[2] = speed;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipDriveForward(MiP* pMiP, uint8_t speed, uint16_t time)
+{
+    // The time parameters is in units of 7 milliseconds.
+    uint8_t command[1+2];
+
+    assert( pMiP );
+    assert( speed <= 30 );
+    assert( time <= 255 * 7 );
+
+    command[0] = MIP_CMD_DRIVE_FORWARD;
+    command[1] = speed;
+    command[2] = time / 7;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipDriveBackward(MiP* pMiP, uint8_t speed, uint16_t time)
+{
+    // The time parameters is in units of 7 milliseconds.
+    uint8_t command[1+2];
+
+    assert( pMiP );
+    assert( speed <= 30 );
+    assert( time <= 255 * 7 );
+
+    command[0] = MIP_CMD_DRIVE_BACKWARD;
+    command[1] = speed;
+    command[2] = time / 7;
 
     return mipRawSend(pMiP, command, sizeof(command));
 }

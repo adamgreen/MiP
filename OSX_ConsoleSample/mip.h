@@ -138,6 +138,8 @@ int mipDistanceDrive(MiP* pMiP, MiPDriveDirection driveDirection, uint8_t cm,
                                 MiPTurnDirection turnDirection, uint16_t degrees);
 int mipTurnLeft(MiP* pMiP, uint16_t degrees, uint8_t speed);
 int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed);
+int mipDriveForward(MiP* pMiP, uint8_t speed, uint16_t time);
+int mipDriveBackward(MiP* pMiP, uint8_t speed, uint16_t time);
 int mipStop(MiP* pMiP);
 
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);

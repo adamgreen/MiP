@@ -98,6 +98,8 @@ void robotMain(void)
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdistancedrive | mipDistanceDrive]]                            |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnleft | mipTurnLeft]]                                      |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipturnright | mipTurnRight]]                                    |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdriveforward | mipDriveForward]]                              |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdrivebackward | mipDriveBackward]]                            |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
 | Notifications     | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
@@ -112,6 +114,8 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipcontinuousdrive | mipContinuousDrive]]                        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdisconnectfromrobot | mipDisconnectFromRobot]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdistancedrive | mipDistanceDrive]]                            |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdrivebackward | mipDriveBackward]]                            |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdriveforward | mipDriveForward]]                              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipflashchestled | mipFlashChestLED]]                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetchestled | mipGetChestLED]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]        |
@@ -990,6 +994,82 @@ void robotMain(void)
     result = mipTurnLeft(pMiP, 180, 12);
     sleep(2);
     result = mipTurnRight(pMiP, 180, 12);
+    sleep(2);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipDriveForward
+{{{int mipDriveForward(MiP* pMiP, uint8_t speed, uint16_t time);}}}\\
+Commands the MiP robot to drive forward.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* speed: The speed at which the motion should take place.  The speed can have a value between 0 and 30 with 0 being the
+  slowest rate and 30 the fastest.
+* time: The time to drive forward in milliseconds.  This parameter can have a value between 0 and 1785 milliseconds. The
+  MiP only supports a granularity of 7 milliseconds for this parameter.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int   result = -1;
+    MiP*  pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipDriveForward() & mipDriveBackward() functions.\n"
+           "\tDrive ahead and back, 1 second in each direction.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipDriveForward(pMiP, 15, 1000);
+    sleep(2);
+    result = mipDriveBackward(pMiP, 15, 1000);
+    sleep(2);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipDriveBackward
+{{{int mipDriveBackward(MiP* pMiP, uint8_t speed, uint16_t time);}}}\\
+Commands the MiP robot to drive backward.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* speed: The speed at which the motion should take place.  The speed can have a value between 0 and 30 with 0 being the
+  slowest rate and 30 the fastest.
+* time: The time to drive backward in milliseconds.  This parameter can have a value between 0 and 1785 milliseconds.
+  The MiP only supports a granularity of 7 milliseconds for this parameter.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int   result = -1;
+    MiP*  pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipDriveForward() & mipDriveBackward() functions.\n"
+           "\tDrive ahead and back, 1 second in each direction.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipDriveForward(pMiP, 15, 1000);
+    sleep(2);
+    result = mipDriveBackward(pMiP, 15, 1000);
     sleep(2);
 
     mipUninit(pMiP);
