@@ -101,6 +101,7 @@ void robotMain(void)
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdriveforward | mipDriveForward]]                              |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdrivebackward | mipDriveBackward]]                            |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetposition | mipSetPosition]]                                |
 | Notifications     | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                        |
@@ -132,6 +133,7 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetchestled | mipSetChestLED]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetheadleds | mipSetHeadLEDs]]                                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetposition | mipSetPosition]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]                  |
@@ -1105,6 +1107,39 @@ void robotMain(void)
     sleep(1);
     result = mipStop(pMiP);
     sleep(1);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipSetPosition
+{{{int mipSetPosition(MiP* pMiP, MiPPosition position);}}}\\
+Have the MiP fall forward or backward.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* position: In which direction should the MiP fall: **MIP_DRIVE_FORWARD** or **MIP_DRIVE_BACKWARD**.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int   result = -1;
+    MiP*  pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipSetPosition().\n"
+           "\tFall forward.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipSetPosition(pMiP, MIP_POSITION_FACE_DOWN);
+    sleep(2);
 
     mipUninit(pMiP);
 }

@@ -24,6 +24,7 @@
 // MiP Protocol Commands.
 // These command codes are placed in the first byte of requests sent to the MiP and responses sent back from the MiP.
 // See https://github.com/WowWeeLabs/MiP-BLE-Protocol/blob/master/MiP-Protocol.md for more information.
+#define MIP_CMD_SET_POSITION            0x08
 #define MIP_CMD_SET_GESTURE_RADAR_MODE  0x0C
 #define MIP_CMD_GET_RADAR_RESPONSE      0x0C
 #define MIP_CMD_GET_GESTURE_RADAR_MODE  0x0D
@@ -389,6 +390,18 @@ int mipStop(MiP* pMiP)
     assert( pMiP );
 
     command[0] = MIP_CMD_STOP;
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipSetPosition(MiP* pMiP, MiPPosition position)
+{
+    uint8_t command[1+1];
+
+    assert( pMiP );
+
+    command[0] = MIP_CMD_SET_POSITION;
+    command[1] = position;
+
     return mipRawSend(pMiP, command, sizeof(command));
 }
 

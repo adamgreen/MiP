@@ -70,6 +70,12 @@ typedef enum MiPTurnDirection
     MIP_TURN_RIGHT = 0x01
 } MiPTurnDirection;
 
+typedef enum MiPPosition
+{
+    MIP_POSITION_ON_BACK   = 0x00,
+    MIP_POSITION_FACE_DOWN = 0x01
+} MiPPosition;
+
 typedef struct MiPRadarNotification
 {
     uint32_t millisec;
@@ -141,6 +147,7 @@ int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed);
 int mipDriveForward(MiP* pMiP, uint8_t speed, uint16_t time);
 int mipDriveBackward(MiP* pMiP, uint8_t speed, uint16_t time);
 int mipStop(MiP* pMiP);
+int mipSetPosition(MiP* pMiP, MiPPosition position);
 
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
 
