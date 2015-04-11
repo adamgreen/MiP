@@ -29,6 +29,8 @@
 #define MIP_CMD_GET_RADAR_RESPONSE      0x0C
 #define MIP_CMD_GET_GESTURE_RADAR_MODE  0x0D
 #define MIP_CMD_GET_SOFTWARE_VERSION    0x14
+#define MIP_CMD_SET_VOLUME              0x15
+#define MIP_CMD_GET_VOLUME              0x16
 #define MIP_CMD_GET_HARDWARE_INFO       0x19
 #define MIP_CMD_GET_UP                  0x23
 #define MIP_CMD_DISTANCE_DRIVE          0x70
@@ -416,6 +418,43 @@ int mipGetUp(MiP* pMiP, MiPGetUp getup)
     command[1] = getup;
 
     return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipSetVolume(MiP* pMiP, uint8_t volume)
+{
+    uint8_t command[1+1];
+
+    assert( pMiP );
+    assert( volume <= 7 );
+
+    command[0] = MIP_CMD_SET_VOLUME;
+    command[1] = volume;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipGetVolume(MiP* pMiP, uint8_t* pVolume)
+{
+    static const uint8_t getVolume[1] = { MIP_CMD_GET_VOLUME };
+    uint8_t              response[1+1];
+    size_t               responseLength;
+    int                  result;
+
+    assert( pMiP );
+    assert( pVolume );
+
+    result = mipRawReceive(pMiP, getVolume, sizeof(getVolume), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    if (responseLength != sizeof(response) ||
+        response[0] != MIP_CMD_GET_VOLUME ||
+        response[1] > 7)
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    *pVolume = response[1];
+    return result;
 }
 
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification)

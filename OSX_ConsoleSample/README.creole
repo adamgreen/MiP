@@ -103,6 +103,8 @@ void robotMain(void)
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetposition | mipSetPosition]]                                |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetup | mipGetUp]]                                            |
+| Sound             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetvolume | mipSetVolume]]                                    |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetvolume | mipGetVolume]]                                    |
 | Notifications     | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                        |
@@ -128,6 +130,7 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetup | mipGetUp]]                                            |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetvolume | mipGetVolume]]                                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]          |
@@ -136,6 +139,7 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetheadleds | mipSetHeadLEDs]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetposition | mipSetPosition]]                                |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetvolume | mipSetVolume]]                                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstoprobotdiscovery | mipStopRobotDiscovery]]                  |
@@ -1182,6 +1186,81 @@ void robotMain(void)
 
     result = mipGetUp(pMiP, MIP_GETUP_FROM_FRONT);
     sleep(3);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipSetVolume
+{{{int mipSetVolume(MiP* pMiP, uint8_t volume);}}}\\
+Set the MiP's volume level.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* volume: The new volume level (0 - 7).  A level of 0 turns off the sound and 7 is the loudest setting.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    uint8_t volume = 0;
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipSet/GetVolume().\n"
+           "\tSet volume level to 1 and read out afterwards.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipSetVolume(pMiP, 1);
+    result = mipGetVolume(pMiP, &volume);
+
+    printf("Volume = %u\n", volume);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetVolume
+{{{int mipGetVolume(MiP* pMiP, uint8_t* pVolume);}}}\\
+Retrieve the MiP's current volume level.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pVolume: Points to the integer to be filled in with the current volume level (0 - 7).  A level of 0 means the sound is
+  off and 7 is the loudest setting.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if MiP doesn't return a valid state.
+* MIP_ERROR_TIMEOUT if MiP doesn't respond to request after multiple retries.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    uint8_t volume = 0;
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipSet/GetVolume().\n"
+           "\tSet volume level to 1 and read out afterwards.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipSetVolume(pMiP, 1);
+    result = mipGetVolume(pMiP, &volume);
+
+    printf("Volume = %u\n", volume);
 
     mipUninit(pMiP);
 }

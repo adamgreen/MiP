@@ -157,6 +157,9 @@ int mipStop(MiP* pMiP);
 int mipSetPosition(MiP* pMiP, MiPPosition position);
 int mipGetUp(MiP* pMiP, MiPGetUp getup);
 
+int mipSetVolume(MiP* pMiP, uint8_t volume);
+int mipGetVolume(MiP* pMiP, uint8_t* pVolume);
+
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);
