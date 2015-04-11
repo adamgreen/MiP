@@ -76,6 +76,13 @@ typedef enum MiPPosition
     MIP_POSITION_FACE_DOWN = 0x01
 } MiPPosition;
 
+typedef enum MiPGetUp
+{
+    MIP_GETUP_FROM_FRONT  = 0x00,
+    MIP_GETUP_FROM_BACK   = 0x01,
+    MIP_GETUP_FROM_EITHER = 0x02
+} MiPGetUp;
+
 typedef struct MiPRadarNotification
 {
     uint32_t millisec;
@@ -148,6 +155,7 @@ int mipDriveForward(MiP* pMiP, uint8_t speed, uint16_t time);
 int mipDriveBackward(MiP* pMiP, uint8_t speed, uint16_t time);
 int mipStop(MiP* pMiP);
 int mipSetPosition(MiP* pMiP, MiPPosition position);
+int mipGetUp(MiP* pMiP, MiPGetUp getup);
 
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
 

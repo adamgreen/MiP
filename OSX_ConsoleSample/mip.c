@@ -30,6 +30,7 @@
 #define MIP_CMD_GET_GESTURE_RADAR_MODE  0x0D
 #define MIP_CMD_GET_SOFTWARE_VERSION    0x14
 #define MIP_CMD_GET_HARDWARE_INFO       0x19
+#define MIP_CMD_GET_UP                  0x23
 #define MIP_CMD_DISTANCE_DRIVE          0x70
 #define MIP_CMD_DRIVE_FORWARD           0x71
 #define MIP_CMD_DRIVE_BACKWARD          0x72
@@ -401,6 +402,18 @@ int mipSetPosition(MiP* pMiP, MiPPosition position)
 
     command[0] = MIP_CMD_SET_POSITION;
     command[1] = position;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipGetUp(MiP* pMiP, MiPGetUp getup)
+{
+    uint8_t command[1+1];
+
+    assert( pMiP );
+
+    command[0] = MIP_CMD_GET_UP;
+    command[1] = getup;
 
     return mipRawSend(pMiP, command, sizeof(command));
 }

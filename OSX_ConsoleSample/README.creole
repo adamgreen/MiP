@@ -102,6 +102,7 @@ void robotMain(void)
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdrivebackward | mipDriveBackward]]                            |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetposition | mipSetPosition]]                                |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetup | mipGetUp]]                                            |
 | Notifications     | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                        |
@@ -126,6 +127,7 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetheadleds | mipGetHeadLEDs]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetup | mipGetUp]]                                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]          |
@@ -1140,6 +1142,46 @@ void robotMain(void)
 
     result = mipSetPosition(pMiP, MIP_POSITION_FACE_DOWN);
     sleep(2);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+=== mipGetUp
+{{{int mipGetUp(MiP* pMiP, MiPGetUp getup);}}}\\
+Attempt to get the MiP back up and balancing after falling to the back or front.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* getup: In which direction should the MiP attempt to get up from: **MIP_GETUP_FROM_FRONT**, **MIP_GETUP_FROM_BACK**,
+  and **MIP_GETUP_FROM_EITHER**.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:*
+* I haven't had this command work successfully during my testing.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int   result = -1;
+    MiP*  pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipGetUp().\n"
+           "\tAttempt to get up from a front fall.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    result = mipSetPosition(pMiP, MIP_POSITION_FACE_DOWN);
+    sleep(3);
+
+    result = mipGetUp(pMiP, MIP_GETUP_FROM_FRONT);
+    sleep(3);
 
     mipUninit(pMiP);
 }
