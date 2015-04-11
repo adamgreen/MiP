@@ -24,6 +24,7 @@
 // MiP Protocol Commands.
 // These command codes are placed in the first byte of requests sent to the MiP and responses sent back from the MiP.
 // See https://github.com/WowWeeLabs/MiP-BLE-Protocol/blob/master/MiP-Protocol.md for more information.
+#define MIP_CMD_PLAY_SOUND              0x06
 #define MIP_CMD_SET_POSITION            0x08
 #define MIP_CMD_SET_GESTURE_RADAR_MODE  0x0C
 #define MIP_CMD_GET_RADAR_RESPONSE      0x0C
@@ -416,6 +417,36 @@ int mipGetUp(MiP* pMiP, MiPGetUp getup)
 
     command[0] = MIP_CMD_GET_UP;
     command[1] = getup;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipPlaySound(MiP* pMiP, const MiPSound* pSounds, size_t soundCount, uint8_t repeatCount)
+{
+    size_t  i;
+    uint8_t command[1+17];
+
+    assert( pMiP );
+    assert( pSounds );
+    assert( soundCount <= 8 );
+
+    command[0] = MIP_CMD_PLAY_SOUND;
+    for (i = 0 ; i < 8 ; i++)
+    {
+        if (i < soundCount)
+        {
+            // Delay is in units of 30 msecs.
+            assert( pSounds[i].delay <= 255 * 30 );
+            command[1 + i*2] = pSounds[i].sound;
+            command[1 + i*2 +1 ] = pSounds[i].delay / 30;
+        }
+        else
+        {
+            command[1 + i*2] = MIP_SOUND_SHORT_MUTE_FOR_STOP;
+            command[1 + i*2 + 1] = 0;
+        }
+    }
+    command[17] = repeatCount;
 
     return mipRawSend(pMiP, command, sizeof(command));
 }
