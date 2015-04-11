@@ -18,6 +18,28 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==April 10, 2015
+I finished implementing the LED and motion related commands in my
+[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#readme | MiP C API]].  The following APIs were added
+since my last post:
+
+* mipFlashChestLED()
+* mipGetChestLED()
+* mipSetHeadLEDs()
+* mipGetHeadLEDs()
+* mipGetSoftwareVersion()
+* mipGetHardwareInfo()
+* mipDistanceDrive()
+* mipDriveForward()
+* mipDriveBackward()
+* mipSetPosition()
+* mipGetUp()
+
+My next priority is to implement sound related functionality and commands which query the state of sensors such as
+odometer, clap, shake, etc.
+
+
+
 ==April 7, 2015
 I have made some real progress on my
 [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#readme | MiP C API]] over the last couple of days.  I
