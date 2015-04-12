@@ -41,6 +41,7 @@
 #define MIP_CMD_TURN_RIGHT              0x74
 #define MIP_CMD_STOP                    0x77
 #define MIP_CMD_CONTINUOUS_DRIVE        0x78
+#define MIP_CMD_GET_STATUS              0x79
 #define MIP_CMD_GET_CHEST_LED           0x83
 #define MIP_CMD_SET_CHEST_LED           0x84
 #define MIP_CMD_READ_ODOMETER           0x85
@@ -51,7 +52,8 @@
 
 
 // MiP::flags bits
-#define MIP_FLAG_RADAR_VALID 0x01
+#define MIP_FLAG_RADAR_VALID  (1 << 0)
+#define MIP_FLAG_STATUS_VALID (1 << 1)
 
 
 struct MiP
@@ -59,12 +61,14 @@ struct MiP
     MiPTransport*             pTransport;
     mach_timebase_info_data_t machTimebaseInfo;
     MiPRadarNotification      lastRadar;
+    MiPStatus                 lastStatus;
     uint32_t                  flags;
 };
 
 
 // Forward Function Declarations.
 static int isValidHeadLED(MiPHeadLED led);
+static int parseStatus(MiP* pMiP, MiPStatus* pStatus, const uint8_t* pResponse, size_t responseLength);
 static void readNotifications(MiP* pMiP);
 static uint32_t milliseconds(MiP* pMiP);
 
@@ -399,14 +403,14 @@ int mipStop(MiP* pMiP)
     return mipRawSend(pMiP, command, sizeof(command));
 }
 
-int mipSetPosition(MiP* pMiP, MiPPosition position)
+int mipFallDown(MiP* pMiP, MiPFallDirection direction)
 {
     uint8_t command[1+1];
 
     assert( pMiP );
 
     command[0] = MIP_CMD_SET_POSITION;
-    command[1] = position;
+    command[1] = direction;
 
     return mipRawSend(pMiP, command, sizeof(command));
 }
@@ -528,6 +532,46 @@ int mipResetOdometer(MiP* pMiP)
     return mipRawSend(pMiP, command, sizeof(command));
 }
 
+int mipGetStatus(MiP* pMiP, MiPStatus* pStatus)
+{
+    static const uint8_t getStatus[1] = { MIP_CMD_GET_STATUS };
+    uint8_t              response[1+2];
+    size_t               responseLength;
+    int                  result;
+
+    assert( pMiP );
+    assert( pStatus );
+
+    result = mipRawReceive(pMiP, getStatus, sizeof(getStatus), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    return parseStatus(pMiP, pStatus, response, responseLength);
+}
+
+static int parseStatus(MiP* pMiP, MiPStatus* pStatus, const uint8_t* pResponse, size_t responseLength)
+{
+    if (responseLength != 3 ||
+        pResponse[0] != MIP_CMD_GET_STATUS ||
+        pResponse[2] > MIP_POSITION_ON_BACK_WITH_KICKSTAND)
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    // Convert battery integer value to floating point voltage value.
+    pStatus->millisec = milliseconds(pMiP);
+    pStatus->battery = (float)(((pResponse[1] - 0x4D) / (float)(0x7C - 0x4D)) * (6.4f - 4.0f)) + 4.0f;
+    pStatus->position = pResponse[2];
+    return MIP_ERROR_NONE;
+}
+
+static uint32_t milliseconds(MiP* pMiP)
+{
+    static const uint64_t nanoPerMilli = 1000000;
+
+    return (uint32_t)((mach_absolute_time() * pMiP->machTimebaseInfo.numer) /
+                      (nanoPerMilli * pMiP->machTimebaseInfo.denom));
+}
+
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification)
 {
     MiPRadar radar;
@@ -546,8 +590,9 @@ int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification
 
 static void readNotifications(MiP* pMiP)
 {
-    size_t               responseLength = 0;
-    uint8_t              response[MIP_RESPONSE_MAX_LEN];
+    int     result = -1;
+    size_t  responseLength = 0;
+    uint8_t response[MIP_RESPONSE_MAX_LEN];
 
     while (MIP_ERROR_NONE == mipRawReceiveNotification(pMiP, response, sizeof(response), &responseLength))
     {
@@ -564,6 +609,11 @@ static void readNotifications(MiP* pMiP)
                 pMiP->flags |= MIP_FLAG_RADAR_VALID;
             }
             break;
+        case MIP_CMD_GET_STATUS:
+            result = parseStatus(pMiP, &pMiP->lastStatus, response, responseLength);
+            if (result == MIP_ERROR_NONE)
+                pMiP->flags |= MIP_FLAG_STATUS_VALID;
+            break;
         default:
             printf("notification -> ");
             for (int i = 0 ; i < responseLength ; i++)
@@ -574,12 +624,15 @@ static void readNotifications(MiP* pMiP)
     }
 }
 
-static uint32_t milliseconds(MiP* pMiP)
+int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus)
 {
-    static const uint64_t nanoPerMilli = 1000000;
+    readNotifications(pMiP);
 
-    return (uint32_t)((mach_absolute_time() * pMiP->machTimebaseInfo.numer) /
-                      (nanoPerMilli * pMiP->machTimebaseInfo.denom));
+    if ((pMiP->flags & MIP_FLAG_STATUS_VALID) == 0)
+        return MIP_ERROR_EMPTY;
+
+    *pStatus = pMiP->lastStatus;
+    return MIP_ERROR_NONE;
 }
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware)

@@ -13,13 +13,15 @@
    limitations under the License.
 */
 /* Example used in following API documentation:
-    mipGetUp()
+    mipGetStatus()
+    mipGetLatestStatusNotification()
 */
 #include <stdio.h>
 #include <unistd.h>
 #include "mip.h"
 #include "osxble.h"
 
+static void printStatus(const MiPStatus* pStatus);
 
 int main(int argc, char *argv[])
 {
@@ -31,20 +33,30 @@ int main(int argc, char *argv[])
 
 void robotMain(void)
 {
-    int   result = -1;
-    MiP*  pMiP = mipInit(NULL);
+    int     result = -1;
+    MiP*    pMiP = mipInit(NULL);
 
-    printf("\tExample - Use mipGetUp().\n"
-           "\tAttempt to get up from a front fall.\n");
+    printf("\tExample - Use mipGetStatus() and mipGetLatestStatusNotification().\n");
 
     // Connect to first MiP robot discovered.
     result = mipConnectToRobot(pMiP, NULL);
 
-    result = mipFallDown(pMiP, MIP_FALL_FACE_DOWN);
-    sleep(3);
+    MiPStatus status = {0, 0.0f, 0};
+    result = mipGetStatus(pMiP, &status);
+    printf("Call mipGetStatus()\n");
+    printStatus(&status);
 
-    result = mipGetUp(pMiP, MIP_GETUP_FROM_FRONT);
-    sleep(3);
+    printf("Waiting for next MiP status notification.\n");
+    while (MIP_ERROR_NONE != mipGetLatestStatusNotification(pMiP, &status))
+    {
+    }
+    printStatus(&status);
 
     mipUninit(pMiP);
+}
+
+static void printStatus(const MiPStatus* pStatus)
+{
+    printf("Battery voltage: %f\n", pStatus->battery);
+    printf("Position: %d\n", pStatus->position);
 }

@@ -70,10 +70,21 @@ typedef enum MiPTurnDirection
     MIP_TURN_RIGHT = 0x01
 } MiPTurnDirection;
 
+typedef enum MiPFallDirection
+{
+    MIP_FALL_ON_BACK   = 0x00,
+    MIP_FALL_FACE_DOWN = 0x01
+} MiPFallDirection;
+
 typedef enum MiPPosition
 {
-    MIP_POSITION_ON_BACK   = 0x00,
-    MIP_POSITION_FACE_DOWN = 0x01
+    MIP_POSITION_ON_BACK                = 0x00,
+    MIP_POSITION_FACE_DOWN              = 0x01,
+    MIP_POSITION_UPRIGHT                = 0x02,
+    MIP_POSITION_PICKED_UP              = 0x03,
+    MIP_POSITION_HAND_STAND             = 0x04,
+    MIP_POSITION_FACE_DOWN_ON_TRAY      = 0x05,
+    MIP_POSITION_ON_BACK_WITH_KICKSTAND = 0x06
 } MiPPosition;
 
 typedef enum MiPGetUp
@@ -244,6 +255,13 @@ typedef struct MiPSound
     uint16_t      delay;
 } MiPSound;
 
+typedef struct MiPStatus
+{
+    uint32_t    millisec;
+    float       battery;
+    MiPPosition position;
+} MiPStatus;
+
 // Abstraction of the pointer type returned by mipInit() and subsequently passed into all other mip*() functions.
 typedef struct MiP MiP;
 
@@ -278,7 +296,7 @@ int mipTurnRight(MiP* pMiP, uint16_t degrees, uint8_t speed);
 int mipDriveForward(MiP* pMiP, uint8_t speed, uint16_t time);
 int mipDriveBackward(MiP* pMiP, uint8_t speed, uint16_t time);
 int mipStop(MiP* pMiP);
-int mipSetPosition(MiP* pMiP, MiPPosition position);
+int mipFallDown(MiP* pMiP, MiPFallDirection direction);
 int mipGetUp(MiP* pMiP, MiPGetUp getup);
 
 int mipPlaySound(MiP* pMiP, const MiPSound* pSounds, size_t soundCount, uint8_t repeatCount);
@@ -288,7 +306,10 @@ int mipGetVolume(MiP* pMiP, uint8_t* pVolume);
 int mipReadOdometer(MiP* pMiP, float* pDistanceInCm);
 int mipResetOdometer(MiP* pMiP);
 
+int mipGetStatus(MiP* pMiP, MiPStatus* pStatus);
+
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
+int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus);
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);
 int mipGetHardwareInfo(MiP* pMiP, MiPHardwareInfo* pHardware);

@@ -101,14 +101,17 @@ void robotMain(void)
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdriveforward | mipDriveForward]]                              |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdrivebackward | mipDriveBackward]]                            |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
-|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetposition | mipSetPosition]]                                |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipfalldown | mipFallDown]]                                      |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetup | mipGetUp]]                                            |
 | Sound             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipplaysound | mipPlaySound]]                                    |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetvolume | mipGetVolume]]                                    |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetvolume | mipSetVolume]]                                    |
 | Odometer          | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipreadodometer | mipReadOdometer]]                              |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipresetodometer | mipResetOdometer]]                            |
+| Status            | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetstatus | mipGetStatus]]                                    |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlateststatusnotification | mipGetLatestStatusNotification]]|
 | Notifications     | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlateststatusnotification | mipGetLatestStatusNotification]]|
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                        |
 | Raw               | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                        |
@@ -123,6 +126,7 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdistancedrive | mipDistanceDrive]]                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdrivebackward | mipDriveBackward]]                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdriveforward | mipDriveForward]]                              |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipfalldown | mipFallDown]]                                      |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipflashchestled | mipFlashChestLED]]                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetchestled | mipGetChestLED]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]        |
@@ -131,7 +135,9 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetheadleds | mipGetHeadLEDs]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlateststatusnotification | mipGetLatestStatusNotification]]|
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetstatus | mipGetStatus]]                                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetup | mipGetUp]]                                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetvolume | mipGetVolume]]                                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                              |
@@ -144,7 +150,6 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetchestled | mipSetChestLED]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetheadleds | mipSetHeadLEDs]]                                |
-| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetposition | mipSetPosition]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetvolume | mipSetVolume]]                                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstartrobotdiscovery | mipStartRobotDiscovery]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipstop | mipStop]]                                              |
@@ -1125,13 +1130,13 @@ void robotMain(void)
 }}}
 
 
-===mipSetPosition
-{{{int mipSetPosition(MiP* pMiP, MiPPosition position);}}}\\
+===mipFallDown
+{{{int mipFallDown(MiP* pMiP, MiPFallDirection direction);}}}\\
 Have the MiP fall forward or backward.
 
 **Parameters:**
 * pMiP: An object that was previously returned from the mipInit() call.
-* position: In which direction should the MiP fall: **MIP_DRIVE_FORWARD** or **MIP_DRIVE_BACKWARD**.
+* direction: In which direction should the MiP fall: **MIP_FALL_ON_BACK** or **MIP_FALL_FACE_DOWN**.
 
 **Returns:**
 * MIP_ERROR_NONE on success.
@@ -1144,13 +1149,13 @@ void robotMain(void)
     int   result = -1;
     MiP*  pMiP = mipInit(NULL);
 
-    printf("\tExample - Use mipSetPosition().\n"
+    printf("\tExample - Use mipFallDown().\n"
            "\tFall forward.\n");
 
     // Connect to first MiP robot discovered.
     result = mipConnectToRobot(pMiP, NULL);
 
-    result = mipSetPosition(pMiP, MIP_POSITION_FACE_DOWN);
+    result = mipFallDown(pMiP, MIP_FALL_FACE_DOWN);
     sleep(2);
 
     mipUninit(pMiP);
@@ -1187,7 +1192,7 @@ void robotMain(void)
     // Connect to first MiP robot discovered.
     result = mipConnectToRobot(pMiP, NULL);
 
-    result = mipSetPosition(pMiP, MIP_POSITION_FACE_DOWN);
+    result = mipFallDown(pMiP, MIP_FALL_FACE_DOWN);
     sleep(3);
 
     result = mipGetUp(pMiP, MIP_GETUP_FROM_FRONT);
@@ -1542,6 +1547,59 @@ void robotMain(void)
 }}}
 
 
+===mipGetStatus
+{{{int mipGetStatus(MiP* pMiP, MiPStatus* pStatus);}}}\\
+Get the MiP's current status (battery level and position).
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pStatus: A pointer to the MiPStatus structure to be filled in with the contents of the current MiP status.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected value in the status.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The **battery** field in the MiPStatus structure contains the current battery voltage level between 4.0V and 6.4V.
+* The **position** field in the MiPStatus structure indicates the current position of the MiP robot.  The expected
+  values are **MIP_POSITION_ON_BACK**, **MIP_POSITION_FACE_DOWN**, **MIP_POSITION_UPRIGHT**, **MIP_POSITION_PICKED_UP**
+  , **MIP_POSITION_HAND_STAND**, **MIP_POSITION_FACE_DOWN_ON_TRAY**, or **MIP_POSITION_ON_BACK_WITH_KICKSTAND**.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipGetStatus() and mipGetLatestStatusNotification().\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    MiPStatus status = {0, 0.0f, 0};
+    result = mipGetStatus(pMiP, &status);
+    printf("Call mipGetStatus()\n");
+    printStatus(&status);
+
+    printf("Waiting for next MiP status notification.\n");
+    while (MIP_ERROR_NONE != mipGetLatestStatusNotification(pMiP, &status))
+    {
+    }
+    printStatus(&status);
+
+    mipUninit(pMiP);
+}
+
+static void printStatus(const MiPStatus* pStatus)
+{
+    printf("Battery voltage: %f\n", pStatus->battery);
+    printf("Position: %d\n", pStatus->position);
+}
+}}}
+
+
 ===mipGetLatestRadarNotification
 {{{int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);}}}\\
 Retrieves the most recent radar notification from the MiP.
@@ -1588,6 +1646,62 @@ void robotMain(void)
     } while (radar.radar != MIP_RADAR_0CM_10CM);
 
     mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetLatestStatusNotification
+{{{int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus);}}}\\
+Retrieves the most recent status notification from the MiP.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pStatus: A pointer to the MiPStatus structure to be filled in with the contents of the latest MiP status.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_EMPTY if the MiP hasn't sent a radar notification since the connection was made.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected value in the radar notification.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The **millisec** field in the MiPStatus structure can be checked by the caller to see if this notification is the same
+  as the last one retrieved since newer notifications will contain a different value in this  field.
+* The **battery** field in the MiPStatus structure contains the current battery voltage level between 4.0V and 6.4V.
+* The **position** field in the MiPStatus structure indicates the current position of the MiP robot.  The expected
+  values are **MIP_POSITION_ON_BACK**, **MIP_POSITION_FACE_DOWN**, **MIP_POSITION_UPRIGHT**, **MIP_POSITION_PICKED_UP**
+  , **MIP_POSITION_HAND_STAND**, **MIP_POSITION_FACE_DOWN_ON_TRAY**, or **MIP_POSITION_ON_BACK_WITH_KICKSTAND**.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipGetStatus() and mipGetLatestStatusNotification().\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    MiPStatus status = {0, 0.0f, 0};
+    result = mipGetStatus(pMiP, &status);
+    printf("Call mipGetStatus()\n");
+    printStatus(&status);
+
+    printf("Waiting for next MiP status notification.\n");
+    while (MIP_ERROR_NONE != mipGetLatestStatusNotification(pMiP, &status))
+    {
+    }
+    printStatus(&status);
+
+    mipUninit(pMiP);
+}
+
+static void printStatus(const MiPStatus* pStatus)
+{
+    printf("Battery voltage: %f\n", pStatus->battery);
+    printf("Position: %d\n", pStatus->position);
 }
 }}}
 

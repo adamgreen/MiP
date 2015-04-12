@@ -13,7 +13,7 @@
    limitations under the License.
 */
 /* Example used in following API documentation:
-    mipSetPosition()
+    mipFallDown()
 */
 #include <stdio.h>
 #include <unistd.h>
@@ -34,13 +34,13 @@ void robotMain(void)
     int   result = -1;
     MiP*  pMiP = mipInit(NULL);
 
-    printf("\tExample - Use mipSetPosition().\n"
+    printf("\tExample - Use mipFallDown().\n"
            "\tFall forward.\n");
 
     // Connect to first MiP robot discovered.
     result = mipConnectToRobot(pMiP, NULL);
 
-    result = mipSetPosition(pMiP, MIP_POSITION_FACE_DOWN);
+    result = mipFallDown(pMiP, MIP_FALL_FACE_DOWN);
     sleep(2);
 
     mipUninit(pMiP);
