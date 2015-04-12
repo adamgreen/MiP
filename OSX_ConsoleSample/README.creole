@@ -115,6 +115,10 @@ void robotMain(void)
 | Shake             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestshakenotification | mipGetLatestShakeNotification]]      |
 | Weight            | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetweight | mipGetWeight]]                                        |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestweightnotification | mipGetLatestWeightNotification]]    |
+| Clap              | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetclapsettings | mipGetClapSettings]]                            |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipenableclap | mipEnableClap]]                                      |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetclapdelay | mipSetClapDelay]]                                  |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestclapnotification | mipGetLatestClapNotification]]        |
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                      |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                            |
 | Raw               | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                            |
@@ -129,14 +133,17 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdistancedrive | mipDistanceDrive]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdrivebackward | mipDriveBackward]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipdriveforward | mipDriveForward]]                                  |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipenableclap | mipEnableClap]]                                      |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipfalldown | mipFallDown]]                                          |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipflashchestled | mipFlashChestLED]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetchestled | mipGetChestLED]]                                    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetclapsettings | mipGetClapSettings]]                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotcount | mipGetDiscoveredRobotCount]]            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetdiscoveredrobotname | mipGetDiscoveredRobotName]]              |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetgestureradarmode | mipGetGestureRadarMode]]                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetheadleds | mipGetHeadLEDs]]                                    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestclapnotification | mipGetLatestClapNotification]]        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestgesturenotification | mipGetLatestGestureNotification]]  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]      |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestshakenotification | mipGetLatestShakeNotification]]      |
@@ -155,6 +162,7 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipreadodometer | mipReadOdometer]]                                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipresetodometer | mipResetOdometer]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetchestled | mipSetChestLED]]                                    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetclapdelay | mipSetClapDelay]]                                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetheadleds | mipSetHeadLEDs]]                                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetvolume | mipSetVolume]]                                        |
@@ -1651,6 +1659,195 @@ void robotMain(void)
 }}}
 
 
+===mipGetClapSettings
+{{{int mipGetClapSettings(MiP* pMiP, MiPClapSettings* pSettings);}}}\\
+Get the current clap configuration (clap delay and enable settings).
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pSettings: A pointer to the MiPClapSettings structure to be filled in with the contents of the current MiP clap enable
+  and delay settings.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected value in the response.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The **enabled** field will indicate whether clap detection is enabled or not (**MIP_CLAP_DISABLED**
+  or **MIP_CLAP_ENABLED**).  It defaults to being in the disabled state.
+* The **delay** field indicates the current setting of the delay expected between claps.  It defaults to 500.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                    result = -1;
+    MiP*                   pMiP = mipInit(NULL);
+
+    printf("\tExample - Use clap related functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    MiPClapSettings settings = {0, 0};
+    result = mipGetClapSettings(pMiP, &settings);
+    printf("Initial clap settings.\n");
+    printClapSettings(&settings);
+
+    // Modify clap settings.
+    // NOTE: Need some delay between settings or second one will be dropped.
+    result = mipEnableClap(pMiP, MIP_CLAP_ENABLED);
+    sleep(1);
+    result = mipSetClapDelay(pMiP, 501);
+
+    result = mipGetClapSettings(pMiP, &settings);
+    printf("Updated clap settings.\n");
+    printClapSettings(&settings);
+
+    printf("Waiting for user to clap.\n");
+    MiPClap clap = {0, 0};
+    while (MIP_ERROR_NONE != mipGetLatestClapNotification(pMiP, &clap))
+    {
+    }
+    printf("Detected %u claps\n", clap.count);
+
+    mipUninit(pMiP);
+}
+
+static void printClapSettings(const MiPClapSettings* pSettings)
+{
+    printf("  Enabled = %s\n", pSettings->enabled ? "ON" : "OFF");
+    printf("    Delay = %u\n", pSettings->delay);
+}
+}}}
+
+
+===mipEnableClap
+{{{int mipEnableClap(MiP* pMiP, MiPClapEnabled enabled);}}}\\
+Enable or disable MiP clap detection.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* enabled: Should the clap detection feature be **MIP_CLAP_DISABLED** or **MIP_CLAP_ENABLED**.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The MiP defaults to having the clap feature disabled after an application attaches.
+* Attempting to set both the clap delay and this enable state too quickly in succession (< 1 second) can cause one of
+  them to be ignored.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                    result = -1;
+    MiP*                   pMiP = mipInit(NULL);
+
+    printf("\tExample - Use clap related functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    MiPClapSettings settings = {0, 0};
+    result = mipGetClapSettings(pMiP, &settings);
+    printf("Initial clap settings.\n");
+    printClapSettings(&settings);
+
+    // Modify clap settings.
+    // NOTE: Need some delay between settings or second one will be dropped.
+    result = mipEnableClap(pMiP, MIP_CLAP_ENABLED);
+    sleep(1);
+    result = mipSetClapDelay(pMiP, 501);
+
+    result = mipGetClapSettings(pMiP, &settings);
+    printf("Updated clap settings.\n");
+    printClapSettings(&settings);
+
+    printf("Waiting for user to clap.\n");
+    MiPClap clap = {0, 0};
+    while (MIP_ERROR_NONE != mipGetLatestClapNotification(pMiP, &clap))
+    {
+    }
+    printf("Detected %u claps\n", clap.count);
+
+    mipUninit(pMiP);
+}
+
+static void printClapSettings(const MiPClapSettings* pSettings)
+{
+    printf("  Enabled = %s\n", pSettings->enabled ? "ON" : "OFF");
+    printf("    Delay = %u\n", pSettings->delay);
+}
+}}}
+
+
+===mipSetClapDelay
+{{{int mipSetClapDelay(MiP* pMiP, uint16_t delay);}}}\\
+Sets the expected delay between user claps.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* delay: The new delay to be used for clap detection.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* //I don't know what the units are for this setting.  Maybe milliseconds?//
+* The MiP defaults to having the clap delay set to 500 after the application first connects.
+* Attempting to set both the clap delay and the clap enable state too quickly in succession (< 1 second) can cause one
+  of them to be ignored.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                    result = -1;
+    MiP*                   pMiP = mipInit(NULL);
+
+    printf("\tExample - Use clap related functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    MiPClapSettings settings = {0, 0};
+    result = mipGetClapSettings(pMiP, &settings);
+    printf("Initial clap settings.\n");
+    printClapSettings(&settings);
+
+    // Modify clap settings.
+    // NOTE: Need some delay between settings or second one will be dropped.
+    result = mipEnableClap(pMiP, MIP_CLAP_ENABLED);
+    sleep(1);
+    result = mipSetClapDelay(pMiP, 501);
+
+    result = mipGetClapSettings(pMiP, &settings);
+    printf("Updated clap settings.\n");
+    printClapSettings(&settings);
+
+    printf("Waiting for user to clap.\n");
+    MiPClap clap = {0, 0};
+    while (MIP_ERROR_NONE != mipGetLatestClapNotification(pMiP, &clap))
+    {
+    }
+    printf("Detected %u claps\n", clap.count);
+
+    mipUninit(pMiP);
+}
+
+static void printClapSettings(const MiPClapSettings* pSettings)
+{
+    printf("  Enabled = %s\n", pSettings->enabled ? "ON" : "OFF");
+    printf("    Delay = %u\n", pSettings->delay);
+}
+}}}
+
+
 ===mipGetLatestRadarNotification
 {{{int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);}}}\\
 Retrieves the most recent radar notification from the MiP.
@@ -1894,6 +2091,70 @@ void robotMain(void)
     printf("weight = %d\n", weight.weight);
 
     mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetLatestClapNotification
+{{{int mipGetLatestClapNotification(MiP* pMiP, MiPClap* pClap);}}}\\
+Retrieves the most recent clap count detected by the MiP.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pClap: A pointer to the MiPClap structure to be filled in with the information describing the latest MiP clap
+  detection.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_EMPTY if the MiP hasn't sent a clap notification since the connection was made.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The **millisec** field in the MiPClap structure can be checked by the caller to see if this notification is the same
+  as the last one retrieved since newer notifications will contain a different value in this  field.
+* The **count** field in the MiPClap structure contains the number of claps detected in the last event.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                    result = -1;
+    MiP*                   pMiP = mipInit(NULL);
+
+    printf("\tExample - Use clap related functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    MiPClapSettings settings = {0, 0};
+    result = mipGetClapSettings(pMiP, &settings);
+    printf("Initial clap settings.\n");
+    printClapSettings(&settings);
+
+    // Modify clap settings.
+    // NOTE: Need some delay between settings or second one will be dropped.
+    result = mipEnableClap(pMiP, MIP_CLAP_ENABLED);
+    sleep(1);
+    result = mipSetClapDelay(pMiP, 501);
+
+    result = mipGetClapSettings(pMiP, &settings);
+    printf("Updated clap settings.\n");
+    printClapSettings(&settings);
+
+    printf("Waiting for user to clap.\n");
+    MiPClap clap = {0, 0};
+    while (MIP_ERROR_NONE != mipGetLatestClapNotification(pMiP, &clap))
+    {
+    }
+    printf("Detected %u claps\n", clap.count);
+
+    mipUninit(pMiP);
+}
+
+static void printClapSettings(const MiPClapSettings* pSettings)
+{
+    printf("  Enabled = %s\n", pSettings->enabled ? "ON" : "OFF");
+    printf("    Delay = %u\n", pSettings->delay);
 }
 }}}
 

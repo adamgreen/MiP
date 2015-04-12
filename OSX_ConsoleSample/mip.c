@@ -35,6 +35,10 @@
 #define MIP_CMD_GET_VOLUME              0x16
 #define MIP_CMD_GET_HARDWARE_INFO       0x19
 #define MIP_CMD_SHAKE_RESPONSE          0x1A
+#define MIP_CMD_CLAP_RESPONSE           0x1D
+#define MIP_CMD_ENABLE_CLAP             0x1E
+#define MIP_CMD_GET_CLAP_SETTINGS       0x1F
+#define MIP_CMD_SET_CLAP_DELAY          0x20
 #define MIP_CMD_GET_UP                  0x23
 #define MIP_CMD_DISTANCE_DRIVE          0x70
 #define MIP_CMD_DRIVE_FORWARD           0x71
@@ -60,6 +64,7 @@
 #define MIP_FLAG_GESTURE_VALID (1 << 2)
 #define MIP_FLAG_SHAKE_VALID   (1 << 3)
 #define MIP_FLAG_WEIGHT_VALID  (1 << 4)
+#define MIP_FLAG_CLAP_VALID    (1 << 5)
 
 
 struct MiP
@@ -70,6 +75,7 @@ struct MiP
     MiPGestureNotification    lastGesture;
     MiPStatus                 lastStatus;
     MiPWeight                 lastWeight;
+    MiPClap                   lastClap;
     uint32_t                  flags;
 };
 
@@ -610,6 +616,56 @@ static int parseWeight(MiP* pMiP, MiPWeight* pWeight, const uint8_t* pResponse, 
     return MIP_ERROR_NONE;
 }
 
+int mipGetClapSettings(MiP* pMiP, MiPClapSettings* pSettings)
+{
+    static const uint8_t getClapSettings[1] = { MIP_CMD_GET_CLAP_SETTINGS };
+    uint8_t              response[1+3];
+    size_t               responseLength;
+    int                  result;
+
+    assert( pMiP );
+    assert( pSettings );
+
+    result = mipRawReceive(pMiP, getClapSettings, sizeof(getClapSettings), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    if (responseLength != sizeof(response) ||
+        response[0] != MIP_CMD_GET_CLAP_SETTINGS ||
+        (response[1] != MIP_CLAP_DISABLED && response[1] != MIP_CLAP_ENABLED))
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    pSettings->enabled = response[1];
+    pSettings->delay = response[2] << 8 | response[3];
+    return MIP_ERROR_NONE;
+}
+
+int mipEnableClap(MiP* pMiP, MiPClapEnabled enabled)
+{
+    uint8_t command[1+1];
+
+    assert( pMiP );
+
+    command[0] = MIP_CMD_ENABLE_CLAP;
+    command[1] = enabled;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
+int mipSetClapDelay(MiP* pMiP, uint16_t delay)
+{
+    uint8_t command[1+2];
+
+    assert( pMiP );
+
+    command[0] = MIP_CMD_SET_CLAP_DELAY;
+    command[1] = delay >> 8;
+    command[2] = delay & 0xFF;
+
+    return mipRawSend(pMiP, command, sizeof(command));
+}
+
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification)
 {
     MiPRadar radar;
@@ -671,6 +727,14 @@ static void readNotifications(MiP* pMiP)
             if (result == MIP_ERROR_NONE)
                 pMiP->flags |= MIP_FLAG_WEIGHT_VALID;
             break;
+        case MIP_CMD_CLAP_RESPONSE:
+            if (responseLength == 2)
+            {
+                pMiP->lastClap.millisec = milliseconds(pMiP);
+                pMiP->lastClap.count = response[1];
+                pMiP->flags |= MIP_FLAG_CLAP_VALID;
+            }
+            break;
         default:
             printf("notification -> ");
             for (int i = 0 ; i < responseLength ; i++)
@@ -729,6 +793,16 @@ int mipGetLatestWeightNotification(MiP* pMiP, MiPWeight* pWeight)
     return MIP_ERROR_NONE;
 }
 
+int mipGetLatestClapNotification(MiP* pMiP, MiPClap* pClap)
+{
+    readNotifications(pMiP);
+
+    if ((pMiP->flags & MIP_FLAG_CLAP_VALID) == 0)
+        return MIP_ERROR_EMPTY;
+
+    *pClap = pMiP->lastClap;
+    return MIP_ERROR_NONE;
+}
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware)
 {

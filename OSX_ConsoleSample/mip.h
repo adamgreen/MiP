@@ -223,6 +223,12 @@ typedef enum MiPSoundIndex
     MIP_SOUND_VOLUME_7   = 0xFE
 } MiPSoundIndex;
 
+typedef enum MiPClapEnabled
+{
+    MIP_CLAP_DISABLED = 0x00,
+    MIP_CLAP_ENABLED  = 0x01
+} MiPClapEnabled;
+
 typedef struct MiPRadarNotification
 {
     uint32_t millisec;
@@ -247,6 +253,12 @@ typedef struct MiPWeight
     uint32_t millisec;
     int8_t   weight;
 } MiPWeight;
+
+typedef struct MiPClap
+{
+    uint32_t millisec;
+    uint8_t  count;
+} MiPClap;
 
 typedef struct MiPChestLED
 {
@@ -284,6 +296,12 @@ typedef struct MiPSound
     MiPSoundIndex sound;
     uint16_t      delay;
 } MiPSound;
+
+typedef struct MiPClapSettings
+{
+    MiPClapEnabled enabled;
+    uint16_t       delay;
+} MiPClapSettings;
 
 // Abstraction of the pointer type returned by mipInit() and subsequently passed into all other mip*() functions.
 typedef struct MiP MiP;
@@ -333,11 +351,16 @@ int mipGetStatus(MiP* pMiP, MiPStatus* pStatus);
 
 int mipGetWeight(MiP* pMiP, MiPWeight* pWeight);
 
+int mipGetClapSettings(MiP* pMiP, MiPClapSettings* pSettings);
+int mipEnableClap(MiP* pMiP, MiPClapEnabled enabled);
+int mipSetClapDelay(MiP* pMiP, uint16_t delay);
+
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
 int mipGetLatestGestureNotification(MiP* pMiP, MiPGestureNotification* pNotification);
 int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus);
 int mipGetLatestShakeNotification(MiP* pMiP);
 int mipGetLatestWeightNotification(MiP* pMiP, MiPWeight* pWeight);
+int mipGetLatestClapNotification(MiP* pMiP, MiPClap* pClap);
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);
 int mipGetHardwareInfo(MiP* pMiP, MiPHardwareInfo* pHardware);
