@@ -34,6 +34,7 @@
 #define MIP_CMD_SET_VOLUME              0x15
 #define MIP_CMD_GET_VOLUME              0x16
 #define MIP_CMD_GET_HARDWARE_INFO       0x19
+#define MIP_CMD_SHAKE_RESPONSE          0x1A
 #define MIP_CMD_GET_UP                  0x23
 #define MIP_CMD_DISTANCE_DRIVE          0x70
 #define MIP_CMD_DRIVE_FORWARD           0x71
@@ -56,6 +57,7 @@
 #define MIP_FLAG_RADAR_VALID   (1 << 0)
 #define MIP_FLAG_STATUS_VALID  (1 << 1)
 #define MIP_FLAG_GESTURE_VALID (1 << 2)
+#define MIP_FLAG_SHAKE_VALID   (1 << 3)
 
 
 struct MiP
@@ -620,6 +622,12 @@ static void readNotifications(MiP* pMiP)
                 pMiP->flags |= MIP_FLAG_GESTURE_VALID;
             }
             break;
+        case MIP_CMD_SHAKE_RESPONSE:
+            if (responseLength == 1)
+            {
+                pMiP->flags |= MIP_FLAG_SHAKE_VALID;
+            }
+            break;
         case MIP_CMD_GET_STATUS:
             result = parseStatus(pMiP, &pMiP->lastStatus, response, responseLength);
             if (result == MIP_ERROR_NONE)
@@ -661,6 +669,17 @@ int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus)
     *pStatus = pMiP->lastStatus;
     return MIP_ERROR_NONE;
 }
+
+int mipGetLatestShakeNotification(MiP* pMiP)
+{
+    readNotifications(pMiP);
+
+    if ((pMiP->flags & MIP_FLAG_SHAKE_VALID) == 0)
+        return MIP_ERROR_EMPTY;
+    pMiP->flags &= ~MIP_FLAG_SHAKE_VALID;
+    return MIP_ERROR_NONE;
+}
+
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware)
 {

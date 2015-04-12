@@ -112,6 +112,7 @@ void robotMain(void)
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlateststatusnotification | mipGetLatestStatusNotification]]    |
 | Radar             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]      |
 | Gesture           | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestgesturenotification | mipGetLatestGestureNotification]]  |
+| Shake             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestshakenotification | mipGetLatestShakeNotification]]      |
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                      |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                            |
 | Raw               | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                            |
@@ -136,6 +137,7 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetheadleds | mipGetHeadLEDs]]                                    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestgesturenotification | mipGetLatestGestureNotification]]  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]      |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestshakenotification | mipGetLatestShakeNotification]]      |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlateststatusnotification | mipGetLatestStatusNotification]]    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                      |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetstatus | mipGetStatus]]                                        |
@@ -1761,6 +1763,42 @@ static void printStatus(const MiPStatus* pStatus)
 {
     printf("Battery voltage: %f\n", pStatus->battery);
     printf("Position: %d\n", pStatus->position);
+}
+}}}
+
+
+===mipGetLatestShakeNotification
+{{{int mipGetLatestShakeNotification(MiP* pMiP);}}}\\
+Determine whether the MiP has been shaken since the last call.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_EMPTY if the MiP hasn't sent a shake notification since the last call.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected value in the shake notification.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                    result = -1;
+    MiP*                   pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipGetLatestShakeNotification() function.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    printf("Waiting for user to shake MiP.\n");
+    while (MIP_ERROR_NONE != mipGetLatestShakeNotification(pMiP))
+    {
+    }
+    printf("Shake detected.\n");
+
+    mipUninit(pMiP);
 }
 }}}
 

@@ -328,6 +328,7 @@ int mipGetStatus(MiP* pMiP, MiPStatus* pStatus);
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
 int mipGetLatestGestureNotification(MiP* pMiP, MiPGestureNotification* pNotification);
 int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus);
+int mipGetLatestShakeNotification(MiP* pMiP);
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);
 int mipGetHardwareInfo(MiP* pMiP, MiPHardwareInfo* pHardware);
