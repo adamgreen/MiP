@@ -106,6 +106,8 @@ void robotMain(void)
 | Sound             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipplaysound | mipPlaySound]]                                    |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetvolume | mipGetVolume]]                                    |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetvolume | mipSetVolume]]                                    |
+| Odometer          | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipreadodometer | mipReadOdometer]]                              |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipresetodometer | mipResetOdometer]]                            |
 | Notifications     | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]  |
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                  |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                        |
@@ -137,6 +139,8 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceivenotification | mipRawReceiveNotification]]          |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                        |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipreadodometer | mipReadOdometer]]                              |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipresetodometer | mipResetOdometer]]                            |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetchestled | mipSetChestLED]]                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetgestureradarmode | mipSetGestureRadarMode]]                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipsetheadleds | mipSetHeadLEDs]]                                |
@@ -1447,6 +1451,91 @@ void robotMain(void)
     result = mipGetVolume(pMiP, &volume);
 
     printf("Volume = %u\n", volume);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipReadOdometer
+{{{int mipReadOdometer(MiP* pMiP, float* pDistanceInCm);}}}\\
+Read the current MiP odometer tally.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pDistanceInCm: Points to the floating point variable to be filled in with the distance travelled (in centimeters)
+  since the last reset.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if MiP doesn't return a valid state.
+* MIP_ERROR_TIMEOUT if MiP doesn't respond to request after multiple retries.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The MiP's odometer is similar to that in a car.  It maintains the total tally of the distance travelled, even across
+  power cycles.
+* The mipResetOdometer() call can be used to reset the odometer.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipReadOdometer() and mipResetOdometer.\n"
+           "\tRead out current odometer reading and reset.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    float cm = 0.0f;
+    result = mipReadOdometer(pMiP, &cm);
+    printf("MiP has travelled %f cm since the last reset.\n", cm);
+
+    result = mipResetOdometer(pMiP);
+    sleep(1);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipResetOdometer
+{{{int mipResetOdometer(MiP* pMiP);}}}\\
+Reset the MiP's odometer.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The MiP's odometer doesn't automatically reset during a power cycle.
+* The developer should call this function if they want to manually reset it.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int     result = -1;
+    MiP*    pMiP = mipInit(NULL);
+
+    printf("\tExample - Use mipReadOdometer() and mipResetOdometer.\n"
+           "\tRead out current odometer reading and reset.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    float cm = 0.0f;
+    result = mipReadOdometer(pMiP, &cm);
+    printf("MiP has travelled %f cm since the last reset.\n", cm);
+
+    result = mipResetOdometer(pMiP);
+    sleep(1);
 
     mipUninit(pMiP);
 }

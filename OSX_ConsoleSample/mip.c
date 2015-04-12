@@ -43,6 +43,8 @@
 #define MIP_CMD_CONTINUOUS_DRIVE        0x78
 #define MIP_CMD_GET_CHEST_LED           0x83
 #define MIP_CMD_SET_CHEST_LED           0x84
+#define MIP_CMD_READ_ODOMETER           0x85
+#define MIP_CMD_RESET_ODOMETER          0x86
 #define MIP_CMD_FLASH_CHEST_LED         0x89
 #define MIP_CMD_SET_HEAD_LEDS           0x8A
 #define MIP_CMD_GET_HEAD_LEDS           0x8B
@@ -486,6 +488,44 @@ int mipGetVolume(MiP* pMiP, uint8_t* pVolume)
 
     *pVolume = response[1];
     return result;
+}
+
+int mipReadOdometer(MiP* pMiP, float* pDistanceInCm)
+{
+    static const uint8_t readOdometer[1] = { MIP_CMD_READ_ODOMETER };
+    uint8_t              response[1+4];
+    size_t               responseLength;
+    uint32_t             ticks;
+    int                  result;
+
+    assert( pMiP );
+    assert( pDistanceInCm );
+
+    result = mipRawReceive(pMiP, readOdometer, sizeof(readOdometer), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    if (responseLength != sizeof(response) ||
+        response[0] != MIP_CMD_READ_ODOMETER)
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    // Tick count is store as big-endian in response buffer.
+    ticks = response[1] << 24 | response[2] << 16 | response[3] << 8 | response[4];
+    // Odometer has 48.5 ticks / cm.
+    *pDistanceInCm = (float)((double)ticks / 48.5);
+    return result;
+}
+
+int mipResetOdometer(MiP* pMiP)
+{
+    uint8_t command[1];
+
+    assert( pMiP );
+
+    command[0] = MIP_CMD_RESET_ODOMETER;
+
+    return mipRawSend(pMiP, command, sizeof(command));
 }
 
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification)

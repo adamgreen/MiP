@@ -285,6 +285,9 @@ int mipPlaySound(MiP* pMiP, const MiPSound* pSounds, size_t soundCount, uint8_t 
 int mipSetVolume(MiP* pMiP, uint8_t volume);
 int mipGetVolume(MiP* pMiP, uint8_t* pVolume);
 
+int mipReadOdometer(MiP* pMiP, float* pDistanceInCm);
+int mipResetOdometer(MiP* pMiP);
+
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);
