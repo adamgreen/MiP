@@ -50,6 +50,17 @@ typedef enum MiPRadar
     MIP_RADAR_0CM_10CM  = 0x03
 } MiPRadar;
 
+typedef enum MiPGesture
+{
+    MIP_GESTURE_LEFT               = 0x0A,
+    MIP_GESTURE_RIGHT              = 0x0B,
+    MIP_GESTURE_CENTER_SWEEP_LEFT  = 0x0C,
+    MIP_GESTURE_CENTER_SWEEP_RIGHT = 0x0D,
+    MIP_GESTURE_CENTER_HOLD        = 0x0E,
+    MIP_GESTURE_FORWARD            = 0x0F,
+    MIP_GESTURE_BACKWARD           = 0x10
+} MiPGesture;
+
 typedef enum MiPHeadLED
 {
     MIP_HEAD_LED_OFF        = 0,
@@ -218,6 +229,12 @@ typedef struct MiPRadarNotification
     MiPRadar radar;
 } MiPRadarNotification;
 
+typedef struct MiPGestureNotification
+{
+    uint32_t   millisec;
+    MiPGesture gesture;
+} MiPGestureNotification;
+
 typedef struct MiPChestLED
 {
     uint16_t onTime;
@@ -309,6 +326,7 @@ int mipResetOdometer(MiP* pMiP);
 int mipGetStatus(MiP* pMiP, MiPStatus* pStatus);
 
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
+int mipGetLatestGestureNotification(MiP* pMiP, MiPGestureNotification* pNotification);
 int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus);
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);

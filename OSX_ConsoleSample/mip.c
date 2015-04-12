@@ -26,6 +26,7 @@
 // See https://github.com/WowWeeLabs/MiP-BLE-Protocol/blob/master/MiP-Protocol.md for more information.
 #define MIP_CMD_PLAY_SOUND              0x06
 #define MIP_CMD_SET_POSITION            0x08
+#define MIP_CMD_GET_GESTURE_RESPONSE    0x0A
 #define MIP_CMD_SET_GESTURE_RADAR_MODE  0x0C
 #define MIP_CMD_GET_RADAR_RESPONSE      0x0C
 #define MIP_CMD_GET_GESTURE_RADAR_MODE  0x0D
@@ -52,8 +53,9 @@
 
 
 // MiP::flags bits
-#define MIP_FLAG_RADAR_VALID  (1 << 0)
-#define MIP_FLAG_STATUS_VALID (1 << 1)
+#define MIP_FLAG_RADAR_VALID   (1 << 0)
+#define MIP_FLAG_STATUS_VALID  (1 << 1)
+#define MIP_FLAG_GESTURE_VALID (1 << 2)
 
 
 struct MiP
@@ -61,6 +63,7 @@ struct MiP
     MiPTransport*             pTransport;
     mach_timebase_info_data_t machTimebaseInfo;
     MiPRadarNotification      lastRadar;
+    MiPGestureNotification    lastGesture;
     MiPStatus                 lastStatus;
     uint32_t                  flags;
 };
@@ -609,6 +612,14 @@ static void readNotifications(MiP* pMiP)
                 pMiP->flags |= MIP_FLAG_RADAR_VALID;
             }
             break;
+        case MIP_CMD_GET_GESTURE_RESPONSE:
+            if (responseLength == 2)
+            {
+                pMiP->lastGesture.millisec = milliseconds(pMiP);
+                pMiP->lastGesture.gesture = response[1];
+                pMiP->flags |= MIP_FLAG_GESTURE_VALID;
+            }
+            break;
         case MIP_CMD_GET_STATUS:
             result = parseStatus(pMiP, &pMiP->lastStatus, response, responseLength);
             if (result == MIP_ERROR_NONE)
@@ -622,6 +633,22 @@ static void readNotifications(MiP* pMiP)
             break;
         }
     }
+}
+
+int mipGetLatestGestureNotification(MiP* pMiP, MiPGestureNotification* pNotification)
+{
+    MiPGesture gesture;
+
+    readNotifications(pMiP);
+
+    if ((pMiP->flags & MIP_FLAG_GESTURE_VALID) == 0)
+        return MIP_ERROR_EMPTY;
+    gesture = pMiP->lastGesture.gesture;
+    if (gesture < MIP_GESTURE_LEFT || gesture > MIP_GESTURE_BACKWARD)
+        return MIP_ERROR_BAD_RESPONSE;
+
+    *pNotification = pMiP->lastGesture;
+    return MIP_ERROR_NONE;
 }
 
 int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus)
