@@ -44,6 +44,7 @@
 #define MIP_CMD_STOP                    0x77
 #define MIP_CMD_CONTINUOUS_DRIVE        0x78
 #define MIP_CMD_GET_STATUS              0x79
+#define MIP_CMD_GET_WEIGHT              0x81
 #define MIP_CMD_GET_CHEST_LED           0x83
 #define MIP_CMD_SET_CHEST_LED           0x84
 #define MIP_CMD_READ_ODOMETER           0x85
@@ -58,6 +59,7 @@
 #define MIP_FLAG_STATUS_VALID  (1 << 1)
 #define MIP_FLAG_GESTURE_VALID (1 << 2)
 #define MIP_FLAG_SHAKE_VALID   (1 << 3)
+#define MIP_FLAG_WEIGHT_VALID  (1 << 4)
 
 
 struct MiP
@@ -67,6 +69,7 @@ struct MiP
     MiPRadarNotification      lastRadar;
     MiPGestureNotification    lastGesture;
     MiPStatus                 lastStatus;
+    MiPWeight                 lastWeight;
     uint32_t                  flags;
 };
 
@@ -74,8 +77,9 @@ struct MiP
 // Forward Function Declarations.
 static int isValidHeadLED(MiPHeadLED led);
 static int parseStatus(MiP* pMiP, MiPStatus* pStatus, const uint8_t* pResponse, size_t responseLength);
-static void readNotifications(MiP* pMiP);
 static uint32_t milliseconds(MiP* pMiP);
+static int parseWeight(MiP* pMiP, MiPWeight* pWeight, const uint8_t* pResponse, size_t responseLength);
+static void readNotifications(MiP* pMiP);
 
 
 MiP* mipInit(const char* pInitOptions)
@@ -577,6 +581,35 @@ static uint32_t milliseconds(MiP* pMiP)
                       (nanoPerMilli * pMiP->machTimebaseInfo.denom));
 }
 
+int mipGetWeight(MiP* pMiP, MiPWeight* pWeight)
+{
+    static const uint8_t getWeight[1] = { MIP_CMD_GET_WEIGHT };
+    uint8_t              response[1+1];
+    size_t               responseLength;
+    int                  result;
+
+    assert( pMiP );
+    assert( pWeight );
+
+    result = mipRawReceive(pMiP, getWeight, sizeof(getWeight), response, sizeof(response), &responseLength);
+    if (result)
+        return result;
+    return parseWeight(pMiP, pWeight, response, responseLength);
+}
+
+static int parseWeight(MiP* pMiP, MiPWeight* pWeight, const uint8_t* pResponse, size_t responseLength)
+{
+    if (responseLength != 2 ||
+        pResponse[0] != MIP_CMD_GET_WEIGHT)
+    {
+        return MIP_ERROR_BAD_RESPONSE;
+    }
+
+    pWeight->millisec = milliseconds(pMiP);
+    pWeight->weight = pResponse[1];
+    return MIP_ERROR_NONE;
+}
+
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification)
 {
     MiPRadar radar;
@@ -633,6 +666,11 @@ static void readNotifications(MiP* pMiP)
             if (result == MIP_ERROR_NONE)
                 pMiP->flags |= MIP_FLAG_STATUS_VALID;
             break;
+        case MIP_CMD_GET_WEIGHT:
+            result = parseWeight(pMiP, &pMiP->lastWeight, response, responseLength);
+            if (result == MIP_ERROR_NONE)
+                pMiP->flags |= MIP_FLAG_WEIGHT_VALID;
+            break;
         default:
             printf("notification -> ");
             for (int i = 0 ; i < responseLength ; i++)
@@ -677,6 +715,17 @@ int mipGetLatestShakeNotification(MiP* pMiP)
     if ((pMiP->flags & MIP_FLAG_SHAKE_VALID) == 0)
         return MIP_ERROR_EMPTY;
     pMiP->flags &= ~MIP_FLAG_SHAKE_VALID;
+    return MIP_ERROR_NONE;
+}
+
+int mipGetLatestWeightNotification(MiP* pMiP, MiPWeight* pWeight)
+{
+    readNotifications(pMiP);
+
+    if ((pMiP->flags & MIP_FLAG_WEIGHT_VALID) == 0)
+        return MIP_ERROR_EMPTY;
+
+    *pWeight = pMiP->lastWeight;
     return MIP_ERROR_NONE;
 }
 

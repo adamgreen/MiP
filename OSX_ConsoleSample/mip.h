@@ -235,6 +235,19 @@ typedef struct MiPGestureNotification
     MiPGesture gesture;
 } MiPGestureNotification;
 
+typedef struct MiPStatus
+{
+    uint32_t    millisec;
+    float       battery;
+    MiPPosition position;
+} MiPStatus;
+
+typedef struct MiPWeight
+{
+    uint32_t millisec;
+    int8_t   weight;
+} MiPWeight;
+
 typedef struct MiPChestLED
 {
     uint16_t onTime;
@@ -271,13 +284,6 @@ typedef struct MiPSound
     MiPSoundIndex sound;
     uint16_t      delay;
 } MiPSound;
-
-typedef struct MiPStatus
-{
-    uint32_t    millisec;
-    float       battery;
-    MiPPosition position;
-} MiPStatus;
 
 // Abstraction of the pointer type returned by mipInit() and subsequently passed into all other mip*() functions.
 typedef struct MiP MiP;
@@ -325,10 +331,13 @@ int mipResetOdometer(MiP* pMiP);
 
 int mipGetStatus(MiP* pMiP, MiPStatus* pStatus);
 
+int mipGetWeight(MiP* pMiP, MiPWeight* pWeight);
+
 int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);
 int mipGetLatestGestureNotification(MiP* pMiP, MiPGestureNotification* pNotification);
 int mipGetLatestStatusNotification(MiP* pMiP, MiPStatus* pStatus);
 int mipGetLatestShakeNotification(MiP* pMiP);
+int mipGetLatestWeightNotification(MiP* pMiP, MiPWeight* pWeight);
 
 int mipGetSoftwareVersion(MiP* pMiP, MiPSoftwareVersion* pSoftware);
 int mipGetHardwareInfo(MiP* pMiP, MiPHardwareInfo* pHardware);

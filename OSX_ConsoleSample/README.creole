@@ -113,6 +113,8 @@ void robotMain(void)
 | Radar             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]      |
 | Gesture           | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestgesturenotification | mipGetLatestGestureNotification]]  |
 | Shake             | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestshakenotification | mipGetLatestShakeNotification]]      |
+| Weight            | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetweight | mipGetWeight]]                                        |
+|                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestweightnotification | mipGetLatestWeightNotification]]    |
 | Version Info      | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                      |
 |                   | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgethardwareinfo | mipGetHardwareInfo]]                            |
 | Raw               | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawsend | mipRawSend]]                                            |
@@ -139,10 +141,12 @@ void robotMain(void)
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestradarnotification | mipGetLatestRadarNotification]]      |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestshakenotification | mipGetLatestShakeNotification]]      |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlateststatusnotification | mipGetLatestStatusNotification]]    |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetlatestweightnotification | mipGetLatestWeightNotification]]    |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetsoftwareversion | mipGetSoftwareVersion]]                      |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetstatus | mipGetStatus]]                                        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetup | mipGetUp]]                                                |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetvolume | mipGetVolume]]                                        |
+| [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipgetweight | mipGetWeight]]                                        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipinit | mipInit]]                                                  |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#mipplaysound | mipPlaySound]]                                        |
 | [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#miprawreceive | mipRawReceive]]                                      |
@@ -1603,6 +1607,50 @@ static void printStatus(const MiPStatus* pStatus)
 }}}
 
 
+===mipGetWeight
+{{{int mipGetWeight(MiP* pMiP, MiPWeight* pWeight);}}}\\
+Get MiP's current weight / tilt reading.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pWeight: A pointer to the MiPWeight structure to be filled in with the contents of the current MiP weight / tilt
+  reading.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected value in the status.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The **weight** field in the MiPWeight structure contains the signed indication of how much it is tilted to keep its
+  center of balance beneath the current weight.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                    result = -1;
+    MiP*                   pMiP = mipInit(NULL);
+
+    printf("\tExample - Use weight update functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    MiPWeight weight = {0, 0};
+    result = mipGetWeight(pMiP, &weight);
+    printf("weight = %d\n", weight.weight);
+    printf("Waiting for next weight update.\n");
+    while (MIP_ERROR_NONE != mipGetLatestWeightNotification(pMiP, &weight))
+    {
+    }
+    printf("weight = %d\n", weight.weight);
+
+    mipUninit(pMiP);
+}
+}}}
+
+
 ===mipGetLatestRadarNotification
 {{{int mipGetLatestRadarNotification(MiP* pMiP, MiPRadarNotification* pNotification);}}}\\
 Retrieves the most recent radar notification from the MiP.
@@ -1797,6 +1845,53 @@ void robotMain(void)
     {
     }
     printf("Shake detected.\n");
+
+    mipUninit(pMiP);
+}
+}}}
+
+
+===mipGetLatestWeightNotification
+{{{int mipGetLatestWeightNotification(MiP* pMiP, MiPWeight* pWeight);}}}\\
+Retrieves the most recent weight / tilt status from the MiP.
+
+**Parameters:**
+* pMiP: An object that was previously returned from the mipInit() call.
+* pWeight: A pointer to the MiPWeight structure to be filled in with the contents of the latest MiP weight / tilt
+  status.
+
+**Returns:**
+* MIP_ERROR_NONE on success.
+* MIP_ERROR_EMPTY if the MiP hasn't sent a weight notification since the connection was made.
+* MIP_ERROR_BAD_RESPONSE if the MiP sent back an unexpected value in the weight notification.
+* Non-zero MIP_ERROR_* code otherwise.
+
+**Notes:**
+* The **millisec** field in the MiPWeight structure can be checked by the caller to see if this notification is the same
+  as the last one retrieved since newer notifications will contain a different value in this  field.
+* The **weight** field in the MiPWeight structure contains the signed indication of how much it is tilted to keep its
+  center of balance beneath the current weight.
+
+**Example:**
+{{{
+void robotMain(void)
+{
+    int                    result = -1;
+    MiP*                   pMiP = mipInit(NULL);
+
+    printf("\tExample - Use weight update functions.\n");
+
+    // Connect to first MiP robot discovered.
+    result = mipConnectToRobot(pMiP, NULL);
+
+    MiPWeight weight = {0, 0};
+    result = mipGetWeight(pMiP, &weight);
+    printf("weight = %d\n", weight.weight);
+    printf("Waiting for next weight update.\n");
+    while (MIP_ERROR_NONE != mipGetLatestWeightNotification(pMiP, &weight))
+    {
+    }
+    printf("weight = %d\n", weight.weight);
 
     mipUninit(pMiP);
 }
