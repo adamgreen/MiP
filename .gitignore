@@ -22,4 +22,7 @@ DerivedData
 *.dSym/
 
 # Output binaries
-MiP
+*.o
+*.d
+*.a
+WallFollow

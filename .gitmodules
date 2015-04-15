@@ -1,0 +1,3 @@
+[submodule "MiP-Capi"]
+	path = MiP-Capi
+	url = git@github.com:adamgreen/MiP-Capi.git
