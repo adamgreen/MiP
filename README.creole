@@ -13,14 +13,53 @@ This project is just a place for me to record any progress I make as I hack arou
 [[https://github.com/WowWeeLabs/MiP-BLE-Protocol | WowWee MiP Bluetooth Low Energy Protocol Documentation on GitHub]] \\
 [[https://github.com/charcole/MiP-OSX | charcole's OS X MiP Sample on GitHub]]\\
 [[http://macetech.com/blog/node/126 | WowWee MiP Quick Teardown on macetech.com]]\\
-[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample | My OS X Core Bluetooth Console Sample]]\\
 [[https://github.com/WowWeeLabs/MiP-iOS-SDK#readme | Official WowWee MiP iOS SDK]]\\
+[[https://github.com/adamgreen/MiP-Capi#readme | My MiP C API]]\\
+
+
+
+==April 14, 2015
+Over the weekend, I added support for more MiP commands to my
+[[https://github.com/adamgreen/MiP-Capi#readme | MiP C API]]:
+* mipSetVolume()
+* mipGetVolume()
+* mipPlaySound()
+* mipReadOdometer()
+* mipResetOdometer()
+* mipGetStatus()
+* mipGetLatestStatusNotification()
+* mipGetLatestGestureNotification()
+* mipGetLatestShakeNotification()
+* mipGetWeight()
+* mipGetLatestWeightNotification()
+* mipGetClapSettings()
+* mipEnableClap()
+* mipSetClapDelay()
+* mipGetLatestClapNotification()
+
+I have now completed most of the core commands that I think are most useful for my robot projects so I am going to take
+a break from adding any more support to the MiP C API for now.  In the future there are a few more features that I would
+like to support:
+* Changing of game modes.
+* Commands which put the MiP to sleep, shutdown BLE, etc.
+* Commands which retrieve and modify EEPROM settings.
+* Commands which require two MiPs to use and test.  Currently I have just the one MiP so I didn't have a way to test
+  these features so I have postponed their implementation.
+
+I have moved the MiP C API to its own github repository now: [[https://github.com/adamgreen/MiP-Capi]].  The
+OSX_ConsoleSample was updated to utilize this new repo as a git submodule so that the sample now just contains the wall
+following sample code.
+
+I am now going to take a break from MiP hacking for a few weeks.  Once I jump back to this project I plan to start with
+some hardware modifications:
+* Switch to Li-Ion batteries.
+* Attach a microcontroller directly to the MiP's UART, bypassing BLE.
 
 
 
 ==April 10, 2015
 I finished implementing the LED and motion related commands in my
-[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#readme | MiP C API]].  The following APIs were added
+[[https://github.com/adamgreen/MiP-Capi#readme | MiP C API]].  The following APIs were added
 since my last post:
 
 * mipFlashChestLED()
@@ -42,7 +81,7 @@ odometer, clap, shake, etc.
 
 ==April 7, 2015
 I have made some real progress on my
-[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#readme | MiP C API]] over the last couple of days.  I
+[[https://github.com/adamgreen/MiP-Capi#readme | MiP C API]] over the last couple of days.  I
 added enough high level functions so that I could refactor my
 [[https://github.com/adamgreen/MiP/blob/ac6074fc698d789359bd7a9666e0e57a02471e20/OSX_ConsoleSample/main.c | wall following example]]
 to no longer need to build up command buffers manually and call the mipRaw*() functions.  The added functions include:
@@ -62,8 +101,8 @@ My next priority is to implement functions for all of the remaining LED and moti
 
 ==April 5, 2015
 I started implementing and documenting the new high level MiP C API this weekend.\\
-[[https://github.com/adamgreen/MiP/blob/master/OSX_ConsoleSample/mip.h | MiP C API Header File]]\\
-[[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample#readme | MiP C API Documentation]]\\
+[[https://github.com/adamgreen/MiP-Capi/blob/master/include/mip.h | MiP C API Header File]]\\
+[[https://github.com/adamgreen/MiP-Capi#readme | MiP C API Documentation]]\\
 
 The public MiP C API functions that have been implemented so far are just light wrappers around the lower level
 transport API that I already had in place.  I am now going to start implementing functions for MiP features such as
