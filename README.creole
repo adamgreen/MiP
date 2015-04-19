@@ -18,6 +18,27 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==April 18, 2015
+===MiP's outing to Seattle Robotics Society meeting
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150418-01.jpg}}
+
+I took the MiP along with me to today's [[http://www.seattlerobotics.org | Seattle Robotics Society]] meeting.  The
+photo above shows the MiP navigating around the meeting room with my
+[[https://github.com/adamgreen/MiP/blob/ac6074fc698d789359bd7a9666e0e57a02471e20/OSX_ConsoleSample/main.c | wall following code]].
+This code takes advantage of my [[https://github.com/adamgreen/MiP-Capi#readme | MiP C API]] so that it could run on my
+MacBook Air and control the MiP via Bluetooth Low Energy.  It did hit a few snags in its travels:
+* It is better to keep the arms down so that they don't get hooked on anything.
+* It did get snagged on a few cables.
+** One cable was too large to get over even when the MiP was moving along at a good clip.  I was able to get the MiP to
+   travel over the smaller cables on the floor (like laptop power cables) when I was driving the MiP around the room
+   using the iPhone MiP app.
+** It was easy to get snagged up on the power cables where they plugged into the wall outlet since the MiP  was
+   following the outer wall.
+* It got confused underneath a chair and started driving out towards the middle of the room.  If there were a lot of
+  people milling around in the room, it could lead to similar problems.
+
+
+
 ==April 14, 2015
 Over the weekend, I added support for more MiP commands to my
 [[https://github.com/adamgreen/MiP-Capi#readme | MiP C API]]:
