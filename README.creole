@@ -18,6 +18,60 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==April 26, 2015
+===What's inside my MiP?
+Yesterday I took my MiP apart so that I could start coming up with a plan on how I wanted to upgrade my MiP to use
+rechargeable LiPo batteries and connect a microcontroller directly to the internal UART port.  I started the tear
+down in the garage at the drill press.  This is where I drilled out the wheel hubs with a 3/16" drill bit as suggested
+in [[https://learn.sparkfun.com/tutorials/hacking-the-mip---proto-pack | this Sparkun tutorial]].\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-01.jpg}}\\
+Once the hubs were drilled out, I was able to loosen the screws in the hubs and remove the wheels from the MiP.\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-02.jpg}}\\
+Once the battery pack was removed along with all of the screws accessible from the back of the MiP, I was able to split
+the front and back pieces of the MiP apart.\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-03.jpg}}
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-04.jpg}}\\
+Here are some close-up shots of the top of the MiP circuit board:\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-05.jpg}}
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-10.jpg}}\\
+The blue port in those photos is the 4-pin UART connector to which a microcontroller can be attached.  Full resolution
+versions of those two images can be found at:\\
+[[https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-05-Full.jpg]]\\
+[[https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-10-Full.jpg]]\\
+After disconnecting the cables (battery, switch, and speaker) between the circuit board and back plastics and removing a
+few more screws (located on the circuit board and plastics around the drive train), I was able to expose the bottom of
+the MiP circuit board.
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-07.jpg}}
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-08.jpg}}\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-06.jpg}}\\
+Full resolution versions of those three images can be found at:\\
+[[https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-07-Full.jpg]]\\
+[[https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-08-Full.jpg]]\\
+[[https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-06-Full.jpg]]\\
+The interior of the MiP is quite packed so it will be hard to squeeze in any more electronics but I did notice that the
+head had some free space:\\
+{{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-09.jpg}}
+
+I took a few notes once I had the MiP all apart:
+* The motors appear to have a coil resistance of 7.4 ohms.  This means that at 5V, the motors could require
+  5V / 7.4 ohms = 676mA.
+* I suspect that a voltage regulator that could output 2A peak should be adequate for the LiPo battery replacement
+  project.
+* The CPU is a NuvoTon NM05716LDN.  This part number is  similar to the M0516LDN NuMicro M051 series of ARM Cortex-M0
+  microcontroller from NuvoTon.  The NuvoTon website has data sheets and technical reference manuals for that device.
+* J3 appears to be an unpopulated SWD debugger port.  At this point I think it might have the following pinout (in order
+  from pin closest to J3 label):
+** Ground
+** Unknown (maybe nReset signal?)
+** ICE_CLK (SWD clock)
+** ICE_DAT (SWD data)
+** 3.3V
+* There is an additional FT24C02A 2kbit EEPROM device from Fremont Micro Devices on the top of the board.
+
+I will need to place a few orders from Sparkfun and/or Adafruit in the near future to continue with my MiP hacks.
+
+
+
 ==April 18, 2015
 ===MiP's outing to Seattle Robotics Society meeting
 {{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150418-01.jpg}}
