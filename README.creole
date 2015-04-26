@@ -14,6 +14,7 @@ This project is just a place for me to record any progress I make as I hack arou
 [[https://github.com/charcole/MiP-OSX | charcole's OS X MiP Sample on GitHub]]\\
 [[http://macetech.com/blog/node/126 | WowWee MiP Quick Teardown on macetech.com]]\\
 [[https://github.com/WowWeeLabs/MiP-iOS-SDK#readme | Official WowWee MiP iOS SDK]]\\
+[[https://github.com/adamgreen/MiP#whats-inside-my-mip | My MiP teardown]]\\
 [[https://github.com/adamgreen/MiP-Capi#readme | My MiP C API]]\\
 
 
