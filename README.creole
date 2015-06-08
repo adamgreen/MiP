@@ -28,7 +28,7 @@ in [[https://learn.sparkfun.com/tutorials/hacking-the-mip---proto-pack | this Sp
 {{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-01.jpg}}\\
 Once the hubs were drilled out, I was able to loosen the screws in the hubs and remove the wheels from the MiP.\\
 {{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-02.jpg}}\\
-Once the battery pack was removed along with all of the screws accessible from the back of the MiP, I was able to split
+After removing the battery pack along with all of the screws accessible from the back of the MiP, I was able to split
 the front and back pieces of the MiP apart.\\
 {{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-03.jpg}}
 {{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-04.jpg}}\\
@@ -50,12 +50,12 @@ Full resolution versions of those three images can be found at:\\
 [[https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-08-Full.jpg]]\\
 [[https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-06-Full.jpg]]\\
 The interior of the MiP is quite packed so it will be hard to squeeze in any more electronics but I did notice that the
-head had some free space:\\
+head had some free space I can probably put to good use:\\
 {{https://raw.githubusercontent.com/adamgreen/MiP/master/images/20150425-09.jpg}}
 
 I took a few notes once I had the MiP all apart:
 * The motors appear to have a coil resistance of 7.4 ohms.  This means that at 5V, the motors could require
-  5V / 7.4 ohms = 676mA.
+  5V / 7.4 ohms = 676mA for the stall current.
 * I suspect that a voltage regulator that could output 2A peak should be adequate for the LiPo battery replacement
   project.
 * The CPU is a NuvoTon NM05716LDN.  This part number is  similar to the M0516LDN NuMicro M051 series of ARM Cortex-M0
