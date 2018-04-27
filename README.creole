@@ -19,6 +19,25 @@ This project is just a place for me to record any progress I make as I hack arou
 
 
 
+==April 27, 2018
+Wow! It has been 3 years since I last did any MiP hacking that made it to this page. Time to correct that!
+===Building a Better MiP ProMini Pack
+Sparkfun designed an Arduino compatible [[https://www.sparkfun.com/products/retired/13058 | MiP ProMini Pack]] but it 
+turns out that it had 
+[[https://github.com/WowWeeLabs/MiP-BLE-Protocol/issues/18 | issues with reliably receiving MiP responses]]. After some 
+investigation, [[https://github.com/Tiogaplanet | @Tiogaplanet]] was able to determine that the issue was caused by the 
+ATMEGA328 not being able to reliably receive data at 115200 bps when running at 8MHz as was done by Sparkfun in their 
+MiP ProMini Pack. He confirmed that it did work when run at 16MHz.  That issue kicked off 
+[[https://github.com/adamgreen/MiP_ProMini-Pack#readme | this redesign of the MiP ProMini Pack running at 16MHz/5V]].
+
+{{https://raw.githubusercontent.com/adamgreen/MiP_ProMini-Pack/master/images/20180416-02.jpg}}
+
+I also ported my existing [[https://github.com/adamgreen/MiP-Capi | MiP C API]] project and refactored it to make it 
+more Arduino friendly. This library can be 
+[[https://github.com/adamgreen/MiP_ProMini-Pack/tree/master/Arduino/MiP_ProMini_Pack_Library#readme | found here on GitHub]].
+
+
+
 ==April 26, 2015
 ===What's inside my MiP?
 Yesterday I took my MiP apart so that I could start coming up with a plan on how I wanted to upgrade my MiP to use
