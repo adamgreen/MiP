@@ -1,4 +1,7 @@
 =MiP Hacking
+=Archived - February 4th, 2024
+This project is no longer under active development.
+
 ==Overview
 This project is just a place for me to record any progress I make as I hack around with my
 [[https://www.wowwee.com/mip/ | WowWee MiP Balancing Robot]].
@@ -22,18 +25,18 @@ This project is just a place for me to record any progress I make as I hack arou
 ==April 27, 2018
 Wow! It has been 3 years since I last did any MiP hacking that made it to this page. Time to correct that!
 ===Building a Better MiP ProMini Pack
-Sparkfun designed an Arduino compatible [[https://www.sparkfun.com/products/retired/13058 | MiP ProMini Pack]] but it 
-turns out that it had 
-[[https://github.com/WowWeeLabs/MiP-BLE-Protocol/issues/18 | issues with reliably receiving MiP responses]]. After some 
-investigation, [[https://github.com/Tiogaplanet | @Tiogaplanet]] was able to determine that the issue was caused by the 
-ATMEGA328 not being able to reliably receive data at 115200 bps when running at 8MHz as was done by Sparkfun in their 
-MiP ProMini Pack. He confirmed that it did work when run at 16MHz.  That issue kicked off 
+Sparkfun designed an Arduino compatible [[https://www.sparkfun.com/products/retired/13058 | MiP ProMini Pack]] but it
+turns out that it had
+[[https://github.com/WowWeeLabs/MiP-BLE-Protocol/issues/18 | issues with reliably receiving MiP responses]]. After some
+investigation, [[https://github.com/Tiogaplanet | @Tiogaplanet]] was able to determine that the issue was caused by the
+ATMEGA328 not being able to reliably receive data at 115200 bps when running at 8MHz as was done by Sparkfun in their
+MiP ProMini Pack. He confirmed that it did work when run at 16MHz.  That issue kicked off
 [[https://github.com/adamgreen/MiP_ProMini-Pack#readme | this redesign of the MiP ProMini Pack running at 16MHz/5V]].
 
 {{https://raw.githubusercontent.com/adamgreen/MiP_ProMini-Pack/master/images/20180416-02.jpg}}
 
-I also ported my existing [[https://github.com/adamgreen/MiP-Capi | MiP C API]] project and refactored it to make it 
-more Arduino friendly. This library can be 
+I also ported my existing [[https://github.com/adamgreen/MiP-Capi | MiP C API]] project and refactored it to make it
+more Arduino friendly. This library can be
 [[https://github.com/adamgreen/MiP_ProMini-Pack/tree/master/Arduino/MiP_ProMini_Pack_Library#readme | found here on GitHub]].
 
 
@@ -211,7 +214,7 @@ appears to be holding up well.  I do still need to add support for auto-reconnec
 down.  As part of that experimentation, I have implemented the beginnings of a basic wall following algorithm in the
 [[https://github.com/adamgreen/MiP/tree/master/OSX_ConsoleSample | OSX_ConsoleSample]] and pushed it up to GitHub
 earlier this morning.
-* It starts out by waiting for the user to pick up the robot and place it facing the wall at a distance < 10cm.  
+* It starts out by waiting for the user to pick up the robot and place it facing the wall at a distance < 10cm.
 * Once the code detects that it has been facing the wall at < 10cm for 5 seconds, it is ready to start.
 * It backs away from the wall until it no longer detects the wall with its IR sensors.
 * The MiP then turns left by 120 degrees.  This causes it to face away from the wall a bit.
@@ -326,11 +329,11 @@ Author: Adam Green <adamgr@foo.bar>
 Date:   Wed Mar 25 13:43:19 2015 -0700
 
     Initial commit of OS X console sample
-    
+
     This is the initial commit of the sample code that I have written to
     allow the control of the MiP robot over Bluetooth Low Energy (BLE)
     using the Core Bluetooth framework on OS X.
-    
+
     Two threads are used in this sample.  The main thread is left executing
     a NSApplication run loop.  A worker thread is started to run the
     code which wants to interact with the robot to do things like
@@ -338,7 +341,7 @@ Date:   Wed Mar 25 13:43:19 2015 -0700
     starts at the robotMain() function found in main.c  When it needs
     to utilize the Core Bluetooth stack, it communicates its requests to
     the main thread via mipTransport*() functions.
-    
+
     There are a few limitations to the current code:
     * The transport mechanism, OS X Core Bluetooth in this case, is exposed
       directly to the developer.  In the future this will be abstracted
@@ -406,7 +409,7 @@ As I have been relearning how to write code for OS X and learning more about mul
 I have come across a few interesting resources that I thought I would record here:\\
 [[https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/Multithreading/Introduction/Introduction.html#//apple_ref/doc/uid/10000057i-CH1-SW1 | Apple's Threading Programming Guide]]\\
 [[https://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html | Just Software Solutions - Implementing a Thread-Safe Queue using Condition Variables]]\\
-[[http://www.amazon.com/Advanced-Mac-OS-Programming-Guides/dp/0321706250 | Advanced Mac OS X Programming by Mark Dalrymple 2011 - Chapter 20 - Multithreading]]\\  
+[[http://www.amazon.com/Advanced-Mac-OS-Programming-Guides/dp/0321706250 | Advanced Mac OS X Programming by Mark Dalrymple 2011 - Chapter 20 - Multithreading]]\\
 
 
 
@@ -444,16 +447,16 @@ The response text indicates that the firmware was built on March 22nd, 2014 and 
 The user is able to select the MiP to which a connection should be made and then press the connect button.  That action
 will cause the following selector to be called as the scan sheet/dialog is closed.
 {{{
-/* 
+/*
  This method is called when Scan sheet is closed. Initiate connection to selected MiP robot.
 */
-- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo 
+- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
     [self stopScan];
     if( returnCode == NSAlertDefaultReturn )
     {
         NSIndexSet *indexes = [self.arrayController selectionIndexes];
-        if ([indexes count] != 0) 
+        if ([indexes count] != 0)
         {
             NSUInteger anIndex = [indexes firstIndex];
             peripheral = [self.heartRateMonitors objectAtIndex:anIndex];
@@ -473,15 +476,15 @@ establishes the connection with the selected MiP robot.
 Once the connection is completed, the following selector will be executed:
 {{{
 /*
- Invoked whenever a connection is succesfully created with the peripheral. 
+ Invoked whenever a connection is succesfully created with the peripheral.
  Discover available services on the peripheral
  */
-- (void) centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)aPeripheral 
+- (void) centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)aPeripheral
 {
     characteristicsToFind = 2;
     [aPeripheral setDelegate:self];
     [aPeripheral discoverServices:nil];
-    ...	
+    ...
 }
 }}}
 
@@ -496,12 +499,12 @@ that it supports.  For each of these services it calls the following selector.
  Invoked upon completion of a -[discoverServices:] request.
  Discover available characteristics on interested services
  */
-- (void) peripheral:(CBPeripheral *)aPeripheral didDiscoverServices:(NSError *)error 
+- (void) peripheral:(CBPeripheral *)aPeripheral didDiscoverServices:(NSError *)error
 {
-    for (CBService *aService in aPeripheral.services) 
+    for (CBService *aService in aPeripheral.services)
     {
         NSLog(@"Service found with UUID: %@", aService.UUID);
-        
+
         /* MiP specific services */
         if ([aService.UUID isEqual:[CBUUID UUIDWithString:@MIP_RECEIVE_DATA_SERVICE]] ||
             [aService.UUID isEqual:[CBUUID UUIDWithString:@MIP_SEND_DATA_SERVICE]])
@@ -528,12 +531,12 @@ will be executed:
  Invoked upon completion of a -[discoverCharacteristics:forService:] request.
  Perform appropriate operations on interested characteristics
  */
-- (void) peripheral:(CBPeripheral *)aPeripheral didDiscoverCharacteristicsForService:(CBService *)service error:(NSError *)error 
+- (void) peripheral:(CBPeripheral *)aPeripheral didDiscoverCharacteristicsForService:(CBService *)service error:(NSError *)error
 {
     /* MiP Receive Data Service. */
     if ([service.UUID isEqual:[CBUUID UUIDWithString:@MIP_RECEIVE_DATA_SERVICE]])
     {
-        for (CBCharacteristic *aChar in service.characteristics) 
+        for (CBCharacteristic *aChar in service.characteristics)
         {
             /* Set notification on received data. */
             if ([aChar.UUID isEqual:[CBUUID UUIDWithString:@MIP_RECEIVE_DATA_NOTIFY_CHARACTERISTIC]])
@@ -544,7 +547,7 @@ will be executed:
             }
         }
     }
-    
+
     /* MiP Send Data Service. */
     if ([service.UUID isEqual:[CBUUID UUIDWithString:@MIP_SEND_DATA_SERVICE]])
     {
@@ -586,7 +589,7 @@ following selector because we asked for notifications on the MIP_RECEIVE_DATA_NO
 /*
  Invoked upon completion of a -[readValueForCharacteristic:] request or on the reception of a notification/indication.
  */
-- (void) peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error 
+- (void) peripheral:(CBPeripheral *)aPeripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error
 {
     ...
     /* Response from MiP command has been received. */
@@ -624,7 +627,7 @@ following selector because we asked for notifications on the MIP_RECEIVE_DATA_NO
         {
             NSLog(@"Response buffer = %@", [[[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding] autorelease]);
         }
-        
+
         free(pResponse);
     }
 }
@@ -679,7 +682,7 @@ which don't match can be ignored as they are probably another WowWee product but
 /*
  Invoked when the central discovers heart rate peripheral while scanning.
  */
-- (void) centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)aPeripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI 
+- (void) centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)aPeripheral advertisementData:(NSDictionary *)advertisementData RSSI:(NSNumber *)RSSI
 {
     /* Check the manufacturing data to make sure that the first two bytes are 0x00 0x05 to indicate that it is a MiP device. */
     NSData* manufacturerDataObject = [advertisementData objectForKey:CBAdvertisementDataManufacturerDataKey];
@@ -689,11 +692,11 @@ which don't match can be ignored as they are probably another WowWee product but
     {
         return;
     }
-    
+
     NSMutableArray *peripherals = [self mutableArrayValueForKey:@"heartRateMonitors"];
     if( ![self.heartRateMonitors containsObject:aPeripheral] )
         [peripherals addObject:aPeripheral];
-    
+
     /* Connect to first MiP device found. */
     if(autoConnect)
     {
@@ -706,7 +709,7 @@ which don't match can be ignored as they are probably another WowWee product but
         [connectButton setTitle:@"Cancel"];
         [manager connectPeripheral:peripheral options:nil];
     }
-    
+
     NSLog(@"didDiscoverPeripheral: Name: %@", aPeripheral.name);
     NSLog(@"didDiscoverPeripheral: Advertisment Data: %@", advertisementData);
     NSLog(@"didDiscoverPeripheral: RSSI: %@", RSSI);
